@@ -1,0 +1,44 @@
+name: Container acceptance (synthetic data)
+
+on:
+  push:
+    branches:
+      - main
+      - qa/container-acceptance
+
+# Read-only public CI, never a deployment or registry publication.
+permissions:
+  contents: read
+
+concurrency:
+  group: container-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  container-checks:
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Local container-gate assertions (not Docker acceptance)
+        run: python -m unittest discover -s tests -p test_container_support.py -v
+      - name: Build and verify real Docker restart and offline restore
+        run: python tests/run_container.py
+      - name: Upload sanitized synthetic acceptance summary only
+        uses: actions/upload-artifact@v5
+        with:
+          name: synthetic-container-${{ github.sha }}
+          path: evidence/container/summary.json
+          if-no-files-found: error
+          retention-days: 3
+          include-hidden-files: false

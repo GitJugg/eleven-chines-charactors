@@ -99,3 +99,53 @@ or general log is uploaded. Artifact directories are already git-ignored.
 Screenshots/traces are evidence for inspection, not proof that a human reviewed
 visual quality. Report the exact CI commit and result, and any blocked stages;
 never call this suite passed based on skipped tests or syntax checks alone.
+
+## Real container acceptance (CI only)
+
+`.github/workflows/container-checks.yml` runs on pushes to `main` and
+`qa/container-acceptance`, only in a public repository, on standard
+`ubuntu-24.04` native **linux/amd64**. It uses the runner's existing Docker,
+read-only repository permissions and checkout without stored credentials. It
+installs no host packages, QEMU or privileged helpers and publishes no image.
+The Python standard-library harness has no additional pip dependencies.
+
+`tests/run_container.py` refuses a non-CI, root or non-amd64 environment. It:
+
+1. Verifies a clean checkout at the exact workflow commit. Resolves the existing
+   official `python:3.12-slim` base tag, pins its digest in a temporary build recipe
+   (without changing the repository's Dockerfile), and builds without cache.
+2. Starts a dedicated container with the same hardening as `compose.yaml`:
+   non-root UID/GID, read-only root, all capabilities dropped, no-new-privileges,
+   bounded `/tmp`, and only `127.0.0.1` on a randomly allocated host port. The
+   configurable UID/GID match the CI user's newly created mode-0700 bind directory;
+   there is no `chmod 777`, root container or change to existing host permissions.
+3. Checks Docker and real HTTP health, course/state endpoints, runtime hardening
+   and the packaged offline restore command/dependencies. Writes three synthetic
+   progressive-course events through HTTP and checks duplicate replay adds no row.
+4. Restarts only that container and compares HTTP state, historical calendar and
+   every persisted event row—not just a health response.
+5. Downloads a synthetic SQLite backup, stops the source container, and restores
+   offline with networking disabled into a **second empty** temporary bind directory.
+   Boots a second app container, checks the restored HTTP state and changed recovery
+   generation, and confirms original database and selected backup are unchanged.
+6. Removes only exact per-run names whose ownership labels match, then removes its
+   own temporary directory and image. If container removal cannot be verified, the
+   job fails and does not delete potentially mounted data. No broad prune is used.
+
+Only a small success summary is uploaded (3-day retention): immutable source
+commit, resolved base digest/image IDs, architecture, CI runtime UID/GID, synthetic
+case count, and passed check names. **No database, backup, full inspect, container
+logs, local paths or environment dump is uploaded.** Missing Docker, failed
+checks or incomplete cleanup fail the gate; local helper tests are not Docker
+acceptance. A skipped private-repository job is not a passing run.
+
+This does **not** certify a NAS CPU architecture, real data-directory ownership,
+NAS Docker/Compose implementation, LAN reachability or a real deployment. Those
+conditions require a separate authorized device-specific check. The base tag and
+OS packages remain upstream-maintained inputs; the summary records the exact base
+used for this run, not a promise of future byte-for-byte builds.
+
+Official references checked 2026-10-25:
+- [Docker Official Image packaging for Python](https://github.com/docker-library/python)
+- [Docker container run options](https://docs.docker.com/reference/cli/docker/container/run/)
+- [GitHub standard public-repository runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
