@@ -4,11 +4,14 @@ import json
 import mimetypes
 import os
 import tempfile
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlsplit, parse_qs
 from course import DAYS, VERSION, lesson
 from store import Store
+from curriculum import catalog
 from data_lock import DataLock
 
 ROOT=Path(__file__).resolve().parent
@@ -31,10 +34,15 @@ class Handler(BaseHTTPRequestHandler):
         except (BrokenPipeError,ConnectionResetError):pass
 
     def do_GET(self):
-        path=unquote(urlsplit(self.path).path)
+        url=urlsplit(self.path);path=unquote(url.path);query=parse_qs(url.query)
         try:
             if path=='/api/state':return self.send(200,self.server.store.state(timezone=self.server.timezone))
-            if path=='/api/course':return self.send(200,dict(version=VERSION,days=DAYS,lessons={str(d):lesson(d) for d in range(1,8)}))
+            if path=='/api/course':return self.send(200,dict(version=VERSION,days=DAYS,lessons={str(d):lesson(d) for d in range(1,8)},**catalog()))
+            if path=='/api/settings':return self.send(200,self.server.store.settings())
+            if path=='/api/calendar':
+                month=query.get('month',[None])[0]
+                if month is None:month=datetime.now(ZoneInfo(self.server.store.timezone)).strftime('%Y-%m')
+                return self.send(200,self.server.store.calendar(month,course_version=query.get('course_version',[None])[0]))
             if path=='/api/backup':
                 with tempfile.TemporaryDirectory() as tmp:
                     file=Path(tmp)/'backup.sqlite3';self.server.store.backup(file)
@@ -45,11 +53,13 @@ class Handler(BaseHTTPRequestHandler):
             if not file.is_relative_to((ROOT/'static').resolve()) or not file.is_file():
                 return self.send(404,{'error':'没有找到这个页面'})
             return self.send(200,file.read_bytes(),mimetypes.guess_type(file)[0] or 'application/octet-stream')
+        except ValueError:
+            return self.send(400,{'error':'查询参数无效'})
         except Exception:
             return self.send(500,{'error':'读取失败，请稍后重试；没有清除学习记录'})
 
     def do_POST(self):
-        if self.path!='/api/event':return self.send(404,{'error':'没有这个接口'})
+        if self.path not in ('/api/event','/api/settings'):return self.send(404,{'error':'没有这个接口'})
         origin=self.headers.get('Origin')
         if origin and origin not in ('http://'+self.headers.get('Host',''),'https://'+self.headers.get('Host','')):
             return self.send(403,{'error':'不允许来自其他网站的提交'})
@@ -60,6 +70,7 @@ class Handler(BaseHTTPRequestHandler):
             length=int(self.headers.get('Content-Length','0'))
             if not 0<length<=4096:raise ValueError('记录大小不正确')
             event=json.loads(self.rfile.read(length))
+            if self.path=='/api/settings':return self.send(200,self.server.store.settings(event))
             self.server.store.submit(event)
             return self.send(200,self.server.store.state(timezone=self.server.timezone))
         except (ValueError,TypeError,KeyError):
@@ -80,7 +91,7 @@ def make_server(host,port,database,timezone='Asia/Shanghai'):
     ZoneInfo(timezone)
     lock=DataLock(database)
     try:
-        store=Store(database)
+        store=Store(database,timezone=timezone,locked=True)
         server=LockedServer((host,port),Handler)
     except Exception:
         lock.close();raise

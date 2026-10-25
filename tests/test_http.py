@@ -43,5 +43,23 @@ class HTTP(unittest.TestCase):
   self.assertTrue(body.startswith(b'SQLite format 3\x00'))
   self.assertIn('attachment',h['Content-Disposition'])
  def test_static_app(self):
-  for path in ['/','/app.js','/style.css','/audio/welcome.wav']:
+  for path in ['/','/app.js','/style.css']:
    self.assertEqual(self.req(path)[0],200,path)
+
+  self.assertEqual(self.req('/audio/welcome.wav')[0],404)
+  data=json.loads(self.req('/api/course')[1]);self.assertFalse(data['audio']['available']);self.assertEqual(data['audio']['modes'],['adult','silent'])
+ def test_calendar_and_settings_endpoints(self):
+  code,body,_=self.req('/api/calendar?month=2024-02');self.assertEqual(code,200)
+  self.assertEqual(len(json.loads(body)['days']),29)
+  self.assertEqual(self.req('/api/calendar?month=2024-13')[0],400)
+  self.assertEqual(self.req('/api/calendar?month=2024-02&course_version=bad')[0],400)
+  self.assertEqual(self.req('/api/settings',dict(target_date='2030-02-28'))[0],200)
+  self.assertEqual(json.loads(self.req('/api/settings')[1])['target_date'],'2030-02-28')
+  self.assertEqual(self.req('/api/settings',dict(target_date='2030-02-30'))[0],400)
+  self.assertEqual(self.req('/api/settings',{}, {'Origin':'https://evil.example'})[0],403)
+ def test_explicit_month_does_not_scan_full_state_and_rejects_non_ascii_dates(self):
+  from unittest.mock import patch
+  with patch.object(self.server.store,'state',side_effect=AssertionError('month endpoint must not load all history')):
+   self.assertEqual(self.req('/api/calendar?month=2024-02')[0],200)
+  from urllib.parse import quote
+  self.assertEqual(self.req('/api/calendar?month='+quote('２０２４-０２'))[0],400)

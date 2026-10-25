@@ -2,35 +2,14 @@
 import argparse,json,math,os,shutil,sqlite3,sys,tempfile,time,uuid
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
-from store import Store
+from store import Store, validate_database
 from data_lock import DataLock
 from course import VERSION,DAYS
 
 def validate(path):
-    try:
-        with sqlite3.connect(Path(path).resolve().as_uri()+'?mode=ro',uri=True) as db:
-            if db.execute('PRAGMA integrity_check').fetchone()!=('ok',):raise ValueError('数据库完整性检查失败')
-            with tempfile.TemporaryDirectory() as tmp:
-                reference=Store(Path(tmp)/'reference.db')
-                with reference.connect() as ref:
-                    expected=ref.execute("SELECT type,name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY name").fetchall()
-                actual=db.execute("SELECT type,name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY name").fetchall()
-                if actual!=expected:raise ValueError('备份数据库结构不匹配')
-                meta=dict(db.execute('SELECT key,value FROM meta'))
-                if set(meta)!={'version','course'} or meta['version']!=VERSION or json.loads(meta['course'])!=DAYS:raise ValueError('课程版本或内容不匹配')
-                rows=db.execute('SELECT id,payload,day,step,answer,correct,character,created FROM events ORDER BY day,step LIMIT 1000').fetchall()
-                if len(rows)>=1000:raise ValueError('记录数量不合理')
-                for row in rows:
-                    event=json.loads(row[1]);reference.submit(event)
-                    with reference.connect() as ref:written=ref.execute('SELECT id,payload,day,step,answer,correct,character FROM events WHERE id=?',(event['id'],)).fetchone()
-                    if tuple(row[:7])!=written or not isinstance(row[7],(float,int)) or not math.isfinite(row[7]) or not 0<row[7]<=time.time()+86400:raise ValueError('记录内容不一致')
-                rewards=db.execute('SELECT day,created FROM rewards ORDER BY day').fetchall()
-                if [r[0] for r in rewards]!=reference.state()['rewards']:raise ValueError('奖励记录不一致')
-                if any(not isinstance(r[1],(int,float)) or not math.isfinite(r[1]) or not 0<r[1]<=time.time()+86400 for r in rewards):raise ValueError('奖励日期不正确')
-    except (sqlite3.Error,TypeError,KeyError,json.JSONDecodeError,OSError) as e:
-        raise ValueError('不是有效的小芽识字屋备份') from e
+    return validate_database(path)
 
-def restore(source,target,confirm):
+def restore(source,target,confirm,timezone=None):
     if confirm!='RESTORE':raise ValueError('必须明确输入 RESTORE')
     source=Path(source).resolve();target=Path(target).resolve()
     if source==target:raise ValueError('备份与目标不能是同一文件')
@@ -38,10 +17,26 @@ def restore(source,target,confirm):
     validate(source)
     target.parent.mkdir(parents=True,exist_ok=True)
     with DataLock(target):
+        # Orphan journals can replay over a newly restored main database. Never delete them.
+        for suffix in ('-wal','-shm','-journal'):
+            if Path(str(target)+suffix).exists():raise ValueError('发现数据库日志文件；请先核对并恢复旧数据库状态，没有替换当前数据')
+        restore_timezone=timezone or os.environ.get('APP_TIMEZONE','Asia/Shanghai')
+        if timezone is None and target.exists():
+            try:
+                with sqlite3.connect(target.as_uri()+'?mode=ro',uri=True) as current:
+                    row=current.execute("SELECT value FROM meta WHERE key='activity_timezone'").fetchone()
+                    if row:restore_timezone=row[0]
+            except sqlite3.Error:pass  # A damaged target can be replaced from a valid backup.
         # Create and validate a self-contained SQLite snapshot before replacing anything.
         with tempfile.TemporaryDirectory(dir=target.parent) as tmp:
             staged=Path(tmp)/'restored.sqlite3'
             with sqlite3.connect(source.as_uri()+'?mode=ro',uri=True) as src,sqlite3.connect(staged) as dst:src.backup(dst)
+            staged_meta=validate(staged)
+            # Migrate only the private staged copy; never alter the selected backup.
+            staged_store=Store(staged,timezone=restore_timezone) if 'schema_version' not in staged_meta else Store(staged)
+            with staged_store.connect() as db:
+                db.execute("UPDATE meta SET value=? WHERE key='generation'",(uuid.uuid4().hex,))
+                db.execute("UPDATE meta SET value='0' WHERE key='legacy_queue_allowed'")
             validate(staged)
             previous=None
             if target.exists():
@@ -55,9 +50,10 @@ def restore(source,target,confirm):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('backup');parser.add_argument('--data-dir',required=True);parser.add_argument('--confirm',required=True,choices=['RESTORE'])
+    parser.add_argument('--timezone',help='仅为旧版备份指定原统计时区；已有版本化记录保持其固定时区')
     args=parser.parse_args()
     try:
-        old=restore(args.backup,Path(args.data_dir)/'progress.sqlite3',args.confirm)
+        old=restore(args.backup,Path(args.data_dir)/'progress.sqlite3',args.confirm,timezone=args.timezone)
         print('恢复完成。恢复前副本：'+str(old) if old else '恢复完成，新数据库已建立。')
     except (ValueError,RuntimeError,OSError) as e:parser.exit(1,f'恢复未完成：{e}\n')
 if __name__=='__main__':main()

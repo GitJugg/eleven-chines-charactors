@@ -1,0 +1,78 @@
+name: Browser acceptance (synthetic data)
+
+on:
+  push:
+    branches:
+      - main
+      - qa/browser-acceptance
+
+# No deployment, account settings, secrets, or repository writes.
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-checks:
+    # Standard public-repository GitHub-hosted runner; not larger/self-hosted.
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Install test dependency from official PyPI (no cache)
+        timeout-minutes: 3
+        run: |
+          python -m pip --isolated install --index-url https://pypi.org/simple --no-cache-dir --only-binary=:all: -r requirements-test.txt
+      - name: Install managed Chromium and OS dependencies (CI only)
+        timeout-minutes: 5
+        run: python -m playwright install --with-deps chromium
+      - name: Python unit and HTTP suites
+        timeout-minutes: 3
+        run: python -m unittest discover -s tests -v
+      - name: Node integration, artwork and syntax suites
+        timeout-minutes: 3
+        run: |
+          node --test tests/client.test.mjs tests/illustrations.test.mjs
+          node --check static/app.js
+          node --check static/illustrations.js
+      - name: Real browser gate (any missing browser or skip is a failure)
+        timeout-minutes: 8
+        run: python tests/run_browser.py
+      - name: Check screenshot and trace size
+        id: artifact_safety
+        if: ${{ !cancelled() }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          root = Path('evidence/browser')
+          files = [p for p in root.rglob('*') if p.is_file()]
+          assert all(p.suffix == '.png' or p.name == 'trace.zip' for p in files), 'Unexpected artifact type'
+          assert sum(p.stat().st_size for p in files) <= 32 * 1024 * 1024, 'Artifacts exceed 32 MiB limit'
+          PY
+      - name: Upload synthetic screenshots and traces only
+        if: ${{ !cancelled() && steps.artifact_safety.outcome == 'success' }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: synthetic-browser-${{ github.sha }}
+          path: |
+            evidence/browser/**/*.png
+            evidence/browser/**/trace.zip
+          if-no-files-found: warn
+          retention-days: 3
+          compression-level: 6
+          include-hidden-files: false
