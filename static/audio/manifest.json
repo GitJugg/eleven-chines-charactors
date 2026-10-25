@@ -1,0 +1,432 @@
+{
+  "welcome": {
+    "text": "一起去小院找汉字。先听一听，再看一看。随时可以休息。",
+    "seconds": 6.78,
+    "sha256": "1b66606c8ffdef4b216dc3bd33bb9f2973115ce53fb57fbe47741ded59e0f4df"
+  },
+  "reward": {
+    "text": "今天的花朵送给你。每一次认真尝试，都在慢慢长大。",
+    "seconds": 5.6,
+    "sha256": "2c1356c0ef166d4519b1abb45bcceb932fcf129116c8476c6288879e5fc27403"
+  },
+  "w1-0": {
+    "text": "日。日光。",
+    "seconds": 1.06,
+    "sha256": "da4dfc985d2fa1b4865611bf2788940cc38af79819f6928d84ecb0c3986369fd"
+  },
+  "w1-0-char": {
+    "text": "日。",
+    "seconds": 0.28,
+    "sha256": "dc6858f34828d515f73d4c2fcc1a8922cde7006643d9994a507315eab083460c"
+  },
+  "w1-1": {
+    "text": "月。月亮。",
+    "seconds": 1.06,
+    "sha256": "bc545fb85733c23d1591da8c5f0a7b828f67f951cb7f41865c6c43a34117bd75"
+  },
+  "w1-1-char": {
+    "text": "月。",
+    "seconds": 0.29,
+    "sha256": "7662c0aa94f8e2a20f4a6cd66ae17b0a868bda3e403affe19c00da8bf9bb7e16"
+  },
+  "w1-2": {
+    "text": "山。大山。",
+    "seconds": 1.32,
+    "sha256": "6ddde80025ef3d5d3be4d96bb0d98fe4ebc84baced91e7985fc04e700413c56a"
+  },
+  "w1-2-char": {
+    "text": "山。",
+    "seconds": 0.45,
+    "sha256": "dfcf05dc287f9d274f01a542a53dd09f5ebcd2f4b23e3f33a8b1d076135f87ab"
+  },
+  "w1-3": {
+    "text": "水。河水。",
+    "seconds": 1.31,
+    "sha256": "cbfcae9cb88be3d57d17cddafc9a5d1d1a7d0c0c6aa8634b813e62d22a2470a9"
+  },
+  "w1-3-char": {
+    "text": "水。",
+    "seconds": 0.44,
+    "sha256": "7396b334f59adbec83a7136f2a823342c8a2892fb7361f48bf7316d825b6b3e7"
+  },
+  "w1-4": {
+    "text": "火。火苗。",
+    "seconds": 1.24,
+    "sha256": "42f8f5bdb75b972fca3041486c7ef8699bf801313dd9b6fc9372ad88baea49ea"
+  },
+  "w1-4-char": {
+    "text": "火。",
+    "seconds": 0.34,
+    "sha256": "917894daab2898fddcb2473f5405b55441c57cb86fa6f07df141e13131200afe"
+  },
+  "s1-0": {
+    "text": "太阳照着小院，水面亮亮的。",
+    "seconds": 3.19,
+    "sha256": "a0dd7013f4b3f51f92d0d1ffa88014aeaa9a823d1230570a6640603fca8239d1"
+  },
+  "s1-1": {
+    "text": "月亮出来了，小山安静了。",
+    "seconds": 2.73,
+    "sha256": "e1c762010e07d85853f3c4c6f6aff8170a1f763f4cd56f515685bbb713f8a35f"
+  },
+  "w2-0": {
+    "text": "木。木头。",
+    "seconds": 1.03,
+    "sha256": "ed8a1e6d8d2645289d0953ce8ddb9f7f5f1ff72dfaec8050b9914a926aca8041"
+  },
+  "w2-0-char": {
+    "text": "木。",
+    "seconds": 0.32,
+    "sha256": "35d32dc0034da11ce4b3198a3c8d0dd21688d89d66c87de6cc20eca9afacee19"
+  },
+  "w2-1": {
+    "text": "林。树林。",
+    "seconds": 1.28,
+    "sha256": "d329325f0aed4f547361eeb2c6f319ef17f19046d2acf06023a48f5108b19643"
+  },
+  "w2-1-char": {
+    "text": "林。",
+    "seconds": 0.41,
+    "sha256": "efe37902897f266e5ac5b91b2940152be4b2ec39ff4e494e1bb04e44e2f07d7b"
+  },
+  "w2-2": {
+    "text": "森。森林。",
+    "seconds": 1.31,
+    "sha256": "61de5afb7cfb5ede1cad6d1464542bb913be593cbb86ee982cff5b2a14d19f63"
+  },
+  "w2-2-char": {
+    "text": "森。",
+    "seconds": 0.42,
+    "sha256": "61129a084403e4e1d83b6d67cb02361b26550bd66668328327eeeb3993f42cc8"
+  },
+  "w2-3": {
+    "text": "大。大树。",
+    "seconds": 1.01,
+    "sha256": "80acd902decf152390d784e9d9256613074c028b5b6222e5418ff6844468e714"
+  },
+  "w2-3-char": {
+    "text": "大。",
+    "seconds": 0.26,
+    "sha256": "fd903a94917a733d5de497c8f921de29869ae4fa6ca11c87c369cc1d5d44cdf2"
+  },
+  "w2-4": {
+    "text": "小。小草。",
+    "seconds": 1.39,
+    "sha256": "2eee159f7c3bd06b7c92fe8f23e441dcc3dc824b9103704fb4995dc7cb186b31"
+  },
+  "w2-4-char": {
+    "text": "小。",
+    "seconds": 0.42,
+    "sha256": "d5a3749be0cff85e5357dbadbc2ad79fd5c75a37e1b126b0f18d8b39df95962b"
+  },
+  "s2-0": {
+    "text": "小树长大了，许多树连成树林。",
+    "seconds": 3.48,
+    "sha256": "1fe5d88c9a9856607508b1e15ea6aafac297d2bc85313a844531546cf988df77"
+  },
+  "s2-1": {
+    "text": "森林里有大树，也有小树。",
+    "seconds": 2.87,
+    "sha256": "97ea18e2a35eb4747147be848063bd06b60c3770f28d9480630e4e73dd85569c"
+  },
+  "w3-0": {
+    "text": "人。人们。",
+    "seconds": 1.0,
+    "sha256": "27e51458632b4e14db63722c034de61ae2aaf0aec74dbb7ae78fb921ef4cf591"
+  },
+  "w3-0-char": {
+    "text": "人。",
+    "seconds": 0.36,
+    "sha256": "3a439d17f04b419ecdf32eacde7c51dd4fc3868374398c05abe0812a8b3a9431"
+  },
+  "w3-1": {
+    "text": "口。开口。",
+    "seconds": 1.15,
+    "sha256": "1009dcb07391668293d75ea0f6dcb051ce6137c8cc64866c8ce6c8172529112e"
+  },
+  "w3-1-char": {
+    "text": "口。",
+    "seconds": 0.34,
+    "sha256": "7f55319f39acc01f8140c8889058016e07385d8daa4af6d7168b99709e858afd"
+  },
+  "w3-2": {
+    "text": "手。小手。",
+    "seconds": 1.35,
+    "sha256": "8d523db9df076244fa0f8d3fe386fcf6172cc34717dc972ede9d6c41e17bfe00"
+  },
+  "w3-2-char": {
+    "text": "手。",
+    "seconds": 0.41,
+    "sha256": "b33f26ad05a6da767bb8e6904c116e6138613e664599b4c46f48864800e1dea8"
+  },
+  "w3-3": {
+    "text": "足。手足。",
+    "seconds": 1.27,
+    "sha256": "bb07ace26ee60ff3394ae73c8b12cdd3cd5fbbefc0f36d6ee2680bc816a1386f"
+  },
+  "w3-3-char": {
+    "text": "足。",
+    "seconds": 0.36,
+    "sha256": "d8ca18ad86c3c582b102153db68cd597a2739378480cc5a28f9a13a890811a1e"
+  },
+  "w3-4": {
+    "text": "目。目光。",
+    "seconds": 1.08,
+    "sha256": "70d339b1232b0eec40302b3d1bce626c422215c189e3b7e9d2c5d52fed934fca"
+  },
+  "w3-4-char": {
+    "text": "目。",
+    "seconds": 0.32,
+    "sha256": "35d32dc0034da11ce4b3198a3c8d0dd21688d89d66c87de6cc20eca9afacee19"
+  },
+  "s3-0": {
+    "text": "我张开小手，向你问好。",
+    "seconds": 2.93,
+    "sha256": "843ebce8aa4b6708856249903182ac9e188317085c5d52b502a4d9bba4a86c4a"
+  },
+  "s3-1": {
+    "text": "用目光找一找，小手在哪里？",
+    "seconds": 3.19,
+    "sha256": "21cc173cf606f43e6790f38b9ac45e50735e69db4f6086a12a19bf4413e036f9"
+  },
+  "w4-0": {
+    "text": "田。田地。",
+    "seconds": 1.19,
+    "sha256": "44af65f689552a6f78683ef0c7e94667d28cce68c36fb0a8c65b535a35fc0051"
+  },
+  "w4-0-char": {
+    "text": "田。",
+    "seconds": 0.43,
+    "sha256": "53b2790e02ccfc9d8972dbfc937e3689dfee826e609346ee767e61d5220410b8"
+  },
+  "w4-1": {
+    "text": "土。泥土。",
+    "seconds": 1.08,
+    "sha256": "7ce479a6c3dd272b4c949deaab9bc80a0d9e90e6f340d9e7d6866d31b7bb6d66"
+  },
+  "w4-1-char": {
+    "text": "土。",
+    "seconds": 0.31,
+    "sha256": "5ea852cd9e6035ad760a20692305ec7a685cc23e55c3b755ab76a5742c27e24f"
+  },
+  "w4-2": {
+    "text": "牛。小牛。",
+    "seconds": 1.36,
+    "sha256": "3fd0bcb2bef75d64bf94adcf0583d6cc1893a97ef1132d06bd772ab9fee081d8"
+  },
+  "w4-2-char": {
+    "text": "牛。",
+    "seconds": 0.42,
+    "sha256": "b34b446c6c7aba67f737ad6fd64b982bb1416640e9f711f04313658fb191f823"
+  },
+  "w4-3": {
+    "text": "羊。山羊。",
+    "seconds": 1.24,
+    "sha256": "74f50880051244259c52f8984a531395629711775c16b1a39022b72429805414"
+  },
+  "w4-3-char": {
+    "text": "羊。",
+    "seconds": 0.36,
+    "sha256": "a57fb381eac4e0643c9edb6d66e63d08637e028189dd29cec06eda3fbaeb8478"
+  },
+  "w4-4": {
+    "text": "马。小马。",
+    "seconds": 1.16,
+    "sha256": "30f62c73d189b2c831d73992a516ff47f619b9213fc701e2b490519f2da672a2"
+  },
+  "w4-4-char": {
+    "text": "马。",
+    "seconds": 0.32,
+    "sha256": "6ad0c70bd2b6b03c48d666340374b841d34ac0530abcf5b19bc79d2d1056064f"
+  },
+  "s4-0": {
+    "text": "小牛在田边，山羊在山上。",
+    "seconds": 3.33,
+    "sha256": "df3e73230174e9572a2b11bca030579bcf4b661172335b140214ff1be2502fdc"
+  },
+  "s4-1": {
+    "text": "小马走过田地，足下是软软的土。",
+    "seconds": 3.72,
+    "sha256": "e6aaa8ec258a0c16cb98d0601febc49b07e026960ae32758d6f290f987c52d38"
+  },
+  "w5-0": {
+    "text": "天。天空。",
+    "seconds": 1.33,
+    "sha256": "42a65d82bfbc370eeab9b826b94054a13b1c8b76f2a0ac00569d4dcc8b2fccf4"
+  },
+  "w5-0-char": {
+    "text": "天。",
+    "seconds": 0.42,
+    "sha256": "2246ab74449780873bd9ec3566f2014e58f2e695458fd11afec19c5f8fa116e3"
+  },
+  "w5-1": {
+    "text": "云。白云。",
+    "seconds": 1.32,
+    "sha256": "b942184612638f4821fd4464ca4eaac5747577c012060bf416fd233028930a59"
+  },
+  "w5-1-char": {
+    "text": "云。",
+    "seconds": 0.45,
+    "sha256": "9c36a05b4d2f4926ba772667b76c5c0505b46fabdeac0a1a97802f170eedb30e"
+  },
+  "w5-2": {
+    "text": "雨。雨水。",
+    "seconds": 1.13,
+    "sha256": "c0a69e379cfd6e16b9acb07f6dd8ea285dc84d1f1f88ec5536577d6d30dbcd1e"
+  },
+  "w5-2-char": {
+    "text": "雨。",
+    "seconds": 0.29,
+    "sha256": "6e56f1ae70c208f04019c486094e4f23d695dece10f6b8bbde60f09c44111084"
+  },
+  "w5-3": {
+    "text": "风。大风。",
+    "seconds": 1.25,
+    "sha256": "d93d96618e04243d27cd49b12475fe860f07d6e49eefcf0bfdf3579dbd41cb18"
+  },
+  "w5-3-char": {
+    "text": "风。",
+    "seconds": 0.41,
+    "sha256": "f954353c842f4578ba44881738984285270d287aca17a9c6c064ff27e0aef7b5"
+  },
+  "w5-4": {
+    "text": "雪。雪花。",
+    "seconds": 1.34,
+    "sha256": "a886869fdb49d71bfafbee682c7f3e79074945cd5076cfa9a99a306e2fa795f0"
+  },
+  "w5-4-char": {
+    "text": "雪。",
+    "seconds": 0.39,
+    "sha256": "3f51a8e93cb0b487b2d15371d866d2015ece329151416101a989269cbb76745c"
+  },
+  "s5-0": {
+    "text": "天上有白云，风轻轻地吹。",
+    "seconds": 3.33,
+    "sha256": "1999da3920fd8e76f096ef01e69603ce66949334212c598cbe1b236a5814f420"
+  },
+  "s5-1": {
+    "text": "雨水落下来，雪花也想来做客。",
+    "seconds": 3.63,
+    "sha256": "4810e2e23fe7e0a093c6c2b3cf095708f0e8489b64dd9bca35f92a81ccc6018d"
+  },
+  "w6-0": {
+    "text": "花。小花。",
+    "seconds": 1.31,
+    "sha256": "860f6ac12098e300d7fa56e13a9b9ae7a44facb716bf0765d3a7a7e9d69f0434"
+  },
+  "w6-0-char": {
+    "text": "花。",
+    "seconds": 0.39,
+    "sha256": "e54037495e0ba27ad9b6b51bec6b051f33b32a3038cdea9b9c88fd8605053903"
+  },
+  "w6-1": {
+    "text": "草。小草。",
+    "seconds": 1.36,
+    "sha256": "9310e5366d3d0732bad5b320baa59fde41852b6cdf95672c4cea218d9ede12b9"
+  },
+  "w6-1-char": {
+    "text": "草。",
+    "seconds": 0.39,
+    "sha256": "7e323d4573754ec7138e45a0518d7b65136ec62bd8450546b98ccf27bc1ff82f"
+  },
+  "w6-2": {
+    "text": "叶。树叶。",
+    "seconds": 1.03,
+    "sha256": "50e81ad569b1807d9ca0c90c142090950da3ea1a2c99f81ec8465a0cc4bf7106"
+  },
+  "w6-2-char": {
+    "text": "叶。",
+    "seconds": 0.26,
+    "sha256": "248e9be927d08a5f0733608c89be5d8d90c3989c23f9989c1a9d5c6d27eccdb9"
+  },
+  "w6-3": {
+    "text": "红。红花。",
+    "seconds": 1.28,
+    "sha256": "9243ed4de974ad8fc5708d32a5848309302b7c49f2f0d66cbd2c15a5f4c2626d"
+  },
+  "w6-3-char": {
+    "text": "红。",
+    "seconds": 0.38,
+    "sha256": "225fc9c26bf9991f04342fc6de37533fe690ed06e66847577e39916c6d38168b"
+  },
+  "w6-4": {
+    "text": "白。白云。",
+    "seconds": 1.22,
+    "sha256": "69f4a0cdfc5a7f52547ca8301a62fe183237c58f9cc705d910d328af824ed173"
+  },
+  "w6-4-char": {
+    "text": "白。",
+    "seconds": 0.34,
+    "sha256": "8b416882ccadb3b91ad139a2be0f632f3776bc5a98bcf87aef26cf77427b03f7"
+  },
+  "s6-0": {
+    "text": "红花旁边有小草，树上长着叶。",
+    "seconds": 3.69,
+    "sha256": "8c22d20d5d9aa3a8a3eb514aea4b47e04d4210c711ff7205d31f0891f451b482"
+  },
+  "s6-1": {
+    "text": "白云飘过花园，花草点点头。",
+    "seconds": 3.57,
+    "sha256": "d7f04d20f6d490b06f211a898238bd4a0cc41cc5c052884abad90c9419bf6155"
+  },
+  "w7-0": {
+    "text": "上。上山。",
+    "seconds": 1.39,
+    "sha256": "9ebd5694a31b1863863ae4c567d0ec8a270c98051bd3fda13a8866fdb79d0bc5"
+  },
+  "w7-0-char": {
+    "text": "上。",
+    "seconds": 0.4,
+    "sha256": "715f8f9c4898fe574a91f7eb5b878262460616e61cabe8e11e3d26853e708c55"
+  },
+  "w7-1": {
+    "text": "下。下山。",
+    "seconds": 1.32,
+    "sha256": "c71c6aa4df57ee22b8da3796c3f9c4918a4be7013348f08a28ad2381a31f7784"
+  },
+  "w7-1-char": {
+    "text": "下。",
+    "seconds": 0.36,
+    "sha256": "06955d3f9a4c1058f0b569c71e1c4ac03b5a65bb1de29a01b7e4e82d414fd679"
+  },
+  "w7-2": {
+    "text": "中。中间。",
+    "seconds": 1.19,
+    "sha256": "e1c2b07f69da9dc148580519b6a82827c85e6f62c10d67fb5a00c97e859033e0"
+  },
+  "w7-2-char": {
+    "text": "中。",
+    "seconds": 0.36,
+    "sha256": "653dbe0ed6ddbdb584debc947b44a4cae2257201068a39d0bb9321fcbaeb7454"
+  },
+  "w7-3": {
+    "text": "左。左手。",
+    "seconds": 1.21,
+    "sha256": "63a0460ab9c94cfe2dcbfd63e86ab77d917156aad8600e996229b538e60042ac"
+  },
+  "w7-3-char": {
+    "text": "左。",
+    "seconds": 0.34,
+    "sha256": "9e214c11f4992a6d90050ef1e0f3abed0837ceb4204ee307175d3b12269ed0af"
+  },
+  "w7-4": {
+    "text": "右。右手。",
+    "seconds": 1.17,
+    "sha256": "06137cce1831532c1891735078c7585f71faec7dc971d53bf6cc7eafe2a78bae"
+  },
+  "w7-4-char": {
+    "text": "右。",
+    "seconds": 0.35,
+    "sha256": "787f4827bfb5c1afedeaa3147b5c904ab0eb7de3f06a782a73e9315f72cc5f5f"
+  },
+  "s7-0": {
+    "text": "左手和右手一起拍一拍。",
+    "seconds": 2.72,
+    "sha256": "223e9d77a67ad921304ddc3f21620b643215dc9a3f1b3adb181d1f094717a26f"
+  },
+  "s7-1": {
+    "text": "小山在中间，白云在上面，花草在下面。",
+    "seconds": 5.07,
+    "sha256": "9a69a3f86176fb0d8d2ea073978071250468ec617648512e6e22f7973559e5b9"
+  }
+}

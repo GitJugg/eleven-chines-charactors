@@ -1,0 +1,48 @@
+# Learning records and backups: never publish personal learning data.
+data/
+backups/
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.sqlite3.*
+*.backup
+*.bak
+
+# Secrets and local configuration.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.*
+
+# Audio redistribution permission is not established.
+static/audio/*.wav
+static/audio/*.aiff
+static/audio/*.mp3
+
+# Caches, tool state, local notes and generated evidence.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+.superpowers/
+.codex/
+.agents/
+.DS_Store
+Thumbs.db
+*.log
+*.pid
+*.zip
+HANDOFF.md
+evidence/
+previews/
+docs/
