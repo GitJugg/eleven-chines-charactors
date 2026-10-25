@@ -89,9 +89,13 @@ python3 server.py
 
 恢复后会更新数据库代次：原队列中已存在的同内容事件可确认；尚未保存的旧代次/旧版事件不会自动写入回退后的库。刷新页面并明确核对暂存后再学习。
 
-## Docker / NAS 准备，未部署验收
+## Docker 构建已完成 CI 检查；NAS 尚未部署验收
 
-保留 Dockerfile 与 compose.yaml；只复制应用、课件和静态源码，普通用户运行、应用只读，仅挂载专用数据目录。构建需官方镜像及软件源网络；本轮没有构建镜像、操作 NAS 或改变网络。
+保留 Dockerfile 与 compose.yaml；只复制应用、课件和静态源码，普通用户运行、应用只读，仅挂载专用数据目录。构建需要官方镜像及软件源网络。
+
+公开 CI 已在 **linux/amd64** 实际完成构建、非 root/只读/capability 限制检查、3 条合成记录的容器重启保留、离线恢复到另一空目录及清理验证。准确版本为 [ce6db45](https://github.com/GitJugg/eleven-chines-charactors/commit/ce6db45c8aff3848e43caa9f5f0396cba038c3b8)，结果见 [容器检查 40211480909](https://github.com/GitJugg/eleven-chines-charactors/actions/runs/40211480909) 和 [STATUS.md](STATUS.md)。
+
+**没有发布可拉取镜像，CI 临时镜像已删除；当前仍需从源码构建。** CI 的 UID/GID 1001 不是 NAS 推荐配置，也不能据此推断 NAS 的架构、目录 ACL、Compose、家庭网络或设备重启已通过。没有操作 NAS、开启设备服务或改变家庭网络。以下只是待环境核实后的通用构建命令，不是已部署证明：
 
 ```bash
 mkdir -p data
