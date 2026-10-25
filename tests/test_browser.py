@@ -25,8 +25,51 @@ class BrowserAcceptance(BrowserHarness, unittest.TestCase):
             expect(progress).to_have_attribute('value', str(index))
             expect(p.get_by_role('heading', name=task['title'], exact=True)).to_be_visible()
             self.assert_no_horizontal_overflow(f'{prefix}-step-{index}')
+            if task['kind'] == 'learn':
+                self.assert_visible_art(p.locator('.learning-picture svg'))
+            if task['kind'] == 'sentence':
+                self.assert_visible_art(p.locator('.story-picture svg'))
             if version == 'sprout-3':
                 expect(p.locator('#play')).to_have_count(0)
+                if task['kind'] == 'learn':
+                    art = p.locator('.learning-picture svg')
+                    expect(art).to_have_attribute('data-character', task['char'])
+                    expect(p.locator('.learning-picture .sprout-mascot')).to_have_count(0)
+                    if task['char'] == '兔':
+                        expect(art).to_have_attribute('aria-label', '长耳朵、短尾巴的小兔')
+                        expect(art.locator('.rabbit-ears')).to_have_count(1)
+                if task['kind'] == 'sentence':
+                    scene_index = 0 if task['reading_mode'] == 'shared' else 1
+                    art = p.locator('.story-picture svg')
+                    expect(art).to_have_attribute('data-scene', f'sprout-3-1-{scene_index}')
+                    expect(art).to_have_attribute('aria-label',
+                        '小兔出门了，来到门口；有人招呼“来，小兔”，箭头指向招呼者' if scene_index == 0
+                        else '小兔从门内出门，随后在家门口；两幅场景对应两句话')
+                    expect(art.locator('.rabbit-ears')).to_have_count(2)
+                    expect(p.locator('.story-picture .sprout-mascot')).to_have_count(0)
+                    self.checkpoint(prefix + f'-story-{scene_index}')
+            if task['kind'] == 'match':
+                expect(p.locator('.option-picture svg')).to_have_count(len(task['options']))
+                for choice in task['options']:
+                    option = p.locator(f'button[data-answer="{choice}"] .option-picture svg')
+                    self.assert_visible_art(option)
+                    # Compare DOM artwork with the option-only renderer, not the target answer.
+                    expected = p.evaluate('(word) => new DOMParser().parseFromString(SproutArt.word(word, ""), "image/svg+xml").documentElement.getAttribute("aria-label")', choice)
+                    expect(option).to_have_attribute('aria-label', expected)
+                    if choice == '小兔':
+                        expect(option.locator('.rabbit-ears')).to_have_count(1)
+                if version == 'sprout-3' and task['char'] == '兔':
+                    self.checkpoint(prefix + '-word-options')
+            if task['kind'] in ('listen', 'review'):
+                art = p.locator('.listening-mascot svg')
+                self.assert_visible_art(art)
+                for target_attribute in ('data-character', 'data-word', 'data-scene'):
+                    self.assertIsNone(art.get_attribute(target_attribute))
+                expect(art).to_have_attribute('aria-label', '小芽戴着耳机认真听声音')
+                expect(art.locator('.rabbit, .fish, .book-pages, [data-character], [data-word]')).to_have_count(0)
+                expect(p.locator('.option-picture')).to_have_count(0)
+                if version == 'sprout-3' and task['char'] == '兔':
+                    self.checkpoint(prefix + '-neutral-listen')
             if task.get('options'):
                 for choice in task['options']:
                     # Foundation option SVGs contribute extra accessible names.
@@ -105,6 +148,12 @@ class BrowserAcceptance(BrowserHarness, unittest.TestCase):
         p.get_by_role('button', name='开始今天的冒险', exact=True).click()
         expect(p.locator('.lesson-top .eyebrow')).to_contain_text('第 2 课')
         expect(p.get_by_role('progressbar', name='本课进度')).to_have_attribute('value', '0')
+        expect(p.locator('.listening-mascot svg')).to_have_attribute('aria-label', '小芽戴着耳机认真听声音')
+        expect(p.locator('.learning-picture, .option-picture')).to_have_count(0)
+        self.assert_visible_art(p.locator('.listening-mascot svg'))
+        for target_attribute in ('data-character', 'data-word', 'data-scene'):
+            self.assertIsNone(p.locator('.listening-mascot svg').get_attribute(target_attribute))
+        self.checkpoint('progressive-neutral-review')
         p.get_by_role('button', name='先休息一下', exact=True).click()
         p.get_by_role('button', name='基础 35 字', exact=True).click()
         p.get_by_role('button', name='开始今天的冒险', exact=True).click()

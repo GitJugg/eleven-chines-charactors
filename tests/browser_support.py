@@ -95,6 +95,16 @@ class BrowserHarness:
             return document.documentElement.scrollWidth <= w && document.body.scrollWidth <= w;
         }'''), f'Horizontal overflow at {name}')
 
+    def assert_visible_art(self, locator):
+        # Presence/alt alone is insufficient: hidden or collapsed teaching art must fail.
+        # Scrolling allows a legitimately tall lesson page; first-screen placement is not required.
+        expect(locator).to_be_visible()
+        locator.scroll_into_view_if_needed()
+        box = locator.bounding_box()
+        self.assertIsNotNone(box, 'Teaching SVG has no visible bounding box')
+        self.assertGreaterEqual(box['width'], 48, 'Teaching SVG is too narrow to be legible')
+        self.assertGreaterEqual(box['height'], 32, 'Teaching SVG is too short to be legible')
+
     def checkpoint(self, name):
         # Native pixels, never generated screenshots.
         self.assert_no_horizontal_overflow(name)

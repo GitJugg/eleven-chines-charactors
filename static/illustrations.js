@@ -46,17 +46,116 @@
  const labels={'日':'金色太阳和向外散开的阳光','月':'夜空中的弯弯月亮','山':'高高低低的山峰','水':'弯弯流动的河水','火':'向上升起的火苗','木':'有年轮和纹理的木头','林':'两棵树组成的小树林','森':'三棵树组成的森林','大':'一大一小两个苹果，箭头指向大苹果','小':'一大一小两个苹果，箭头指向小苹果','人':'张开手臂站立的人','口':'张开的嘴巴','手':'张开的五指小手','足':'脚掌和五个脚趾','目':'一只明亮的眼睛','田':'分成小块的田地','土':'土壤里长出小芽','牛':'有牛角和斑纹的小牛','羊':'有后弯角和短须的山羊','马':'长着鬃毛的小马','天':'蓝色天空中有太阳和云','云':'一朵白云','雨':'云朵下落下雨滴','风':'风吹动了叶子','雪':'六个角的雪花','花':'花瓣围着花心的小花','草':'一丛小草','叶':'一片带叶脉的绿叶','红':'红色色块和红色的花','白':'灰绿底板上的白色色块和白云','上':'树的上面有红色圆点，箭头向上','下':'树的下面有红色圆点，箭头向下','中':'三个积木，中间的积木是红色','左':'三个圆点，左边的圆点是红色，箭头向左','右':'三个圆点，右边的圆点是红色，箭头向右'};
  const words={'日光':'日','月亮':'月','大山':'山','河水':'水','火苗':'火','木头':'木','树林':'林','森林':'森','大树':'bigTree','小草':'草','人们':'people','开口':'口','小手':'手','手足':'handsFeet','目光':'目','田地':'田','泥土':'土','小牛':'牛','山羊':'羊','小马':'马','天空':'天','白云':'云','雨水':'雨','大风':'风','雪花':'雪','小花':'花','树叶':'leafTree','红花':'红','上山':'upHill','下山':'downHill','中间':'中','左手':'leftHand','右手':'rightHand'};
  const extras={bigTree:g(tree,20,-9,1)+g(tree,-5,100,.35),people:g(person,-24,35,.75)+g(person,48,-4,1),handsFeet:g(hand,4,5,.8)+g(foot,113,71,.58),leafTree:g(tree,-17,19,.8)+g(singleLeaf,110,83,.45),upHill:g(mountain,0,0,1)+arrow('M66 137l47-78m-18 5 18-5 6 18'),downHill:g(mountain,0,0,1)+arrow('M109 64l49 77m-19-5 19 5 4-19'),leftHand:`<g transform="translate(240 0) scale(-1 1)">${g(hand,-10,10,.82)}</g>`+arrow('M164 42h-35m12-10-12 10 12 10'),rightHand:g(hand,-10,10,.82)+arrow('M76 42h35m-12-10 12 10-12 10')};
+ // Progressive teaching scenes. Function words are situated examples, not pictographic definitions.
+ const feature=(name,shape)=>`<g class="${name}">${shape}</g>`;
+ const fur=(x,y,rx,ry)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#faf7e9" stroke="#b9b59e" stroke-width="2"/>`;
+ const rabbit=feature('rabbit',fur(157,136,13,13)+fur(120,134,39,30)+ellipse(101,155,23,10,'#e5dec9')+ellipse(143,155,23,10,'#e5dec9')+
+  feature('rabbit-ears',fur(102,42,12,34)+fur(135,40,12,35)+ellipse(102,43,5,24,'#e7b5a6')+ellipse(135,41,5,25,'#e7b5a6'))+
+  fur(119,88,39,34)+circle(105,82,4,ink)+circle(135,82,4,ink)+path('M114 96l6 5 6-5',rose,rose,3)+path('M120 102q-8 12-15 2M120 102q8 12 15 2','none',ink,3)+ellipse(91,99,8,5,'#edc8b8')+ellipse(149,99,8,5,'#edc8b8'));
+ const bird=feature('bird',ellipse(112,106,54,34,blue)+circle(151,76,29,blue)+path('M175 76l24 9-25 9',gold,ink,2)+path('M60 106L32 82l8 39 29 6',blue,ink,3)+feature('bird-wing',path('M93 91q-19 34 34 32q13-22-34-32','#a2d4db',ink,3))+circle(159,70,4,ink)+path('M101 137v18m-9 0h17M133 137v18m-8 0h17','none',ink,3));
+ const fish=feature('fish',feature('fish-tail',path('M63 87L29 59v60l34-23',gold,ink,3))+ellipse(122,88,64,35,'#efbc64')+path('M96 58l25-24 20 24',gold,ink,3)+path('M98 112l24 21 17-22',gold,ink,3)+circle(162,80,5,ink)+path('M178 94q-10 8-15 0','none',ink,3)+path('M132 66q-16 22 0 43','none','#c58e43',3));
+ const house=feature('house',feature('house-roof',path('M37 77l83-58 83 58',soil,ink,4))+rect(53,76,134,87,'#f0deb4')+rect(111,108,37,55,'#a6bf96')+rect(68,92,28,29,'#c0e1e2')+path('M82 92v29M68 107h28','none',ink,2));
+ const door=(open=false)=>feature('door-frame',rect(70,24,102,141,'#d2c5a2')+rect(80,31,82,134,'#496f60')+(open?feature('open-door',path('M84 36l53 18v105l-53 7Z','#e9c68a',ink,3)+circle(125,107,4,ink)):rect(84,36,74,129,'#e9c68a')+circle(144,107,4,ink)));
+ const book=feature('book-pages',feature('open-book',path('M26 48q43-18 94 8q51-26 94-8v105q-46-18-94 6q-48-24-94-6Z','#fffaf0',ink,4)+path('M120 56v103M44 73q30-6 57 6M44 93q30-6 57 6M44 114q30-6 57 6M139 79q27-12 57-6M139 99q27-12 57-6M139 120q27-12 57-6','none','#91b4a0',3)));
+ const closedBook=feature('closed-book',rect(68,24,108,137,blue,7)+rect(78,34,89,118,'#fbf7e8',3)+rect(78,34,7,118,rose,1)+path('M96 62h53M96 76h40M96 135h53','none','#a5b69b',3));
+ const umbrella=feature('umbrella',feature('umbrella-canopy',path('M30 85Q120-22 210 85Q180 65 151 85Q120 65 89 85Q60 65 30 85Z',blue,ink,4)+path('M120 25Q91 41 89 85M120 25q30 20 31 60','none','#d7edf0',3))+path('M120 22v123q0 25-21 14','none',ink,5));
+ const river=feature('river-bank',path('M20 28Q84 57 47 90T55 165H216Q166 122 204 82T183 20Z','#b7dfe0','none')+path('M80 51q31 16 73 0M79 118q33 17 76 0M108 149h47','none',blue,4));
+ const fruit=feature('fruit-bowl',g(apple,13,5,.65)+g(apple,89,16,.6)+path('M36 113h168q-11 53-84 52q-73 1-84-52','#dfbf87',ink,3));
+ const kid=(color=gold)=>circle(120,43,23,'#e3b891')+path('M100 29q18-22 39 0','none','#82684f',9)+circle(113,44,2,ink)+circle(128,44,2,ink)+path('M114 55q7 5 13 0','none',ink,2)+path('M120 122l-24 38M120 122l24 38','none',ink,8)+rect(99,73,42,52,color,10)+path('M100 83l-21 24M140 83l21 24','none','#bc9275',8);
+ const speech=(x,y,shape)=>g(path('M0 0h60v36H25L12 49l1-13H0Z','#fffdf4','#91b4a0',2)+shape,x,y);
+ const move=(name,d)=>feature(name,path(d,'none','#c68645',6));
+ const openHouse=g(house,30,13,.9)+g(door(true),80,67,.56);
+ const leaving=feature('direction-out',g(door(true),-43,4,.9)+g(rabbit,81,35,.72)+move('motion-arrow','M84 130h48m-10-10 10 10-10 10'));
+ const approaching=feature('direction-toward',g(kid(leaf),106,37,.75)+g(rabbit,-28,45,.65)+move('motion-arrow','M87 81h54m-10-10 10 10-10 10'));
+ const away=feature('direction-away',g(house,-22,53,.64)+g(rabbit,91,35,.72)+move('motion-arrow','M94 81h48m-10-10 10 10-10 10'));
+ const atHome=feature('home-interior',g(house,-6,0,1.05)+rect(90,97,70,68,'#fbf7e8')+g(rabbit,86,102,.35));
+ const treeBird=feature('tree-canopy',g(tree,12,10,.96)+g(bird,89,21,.42));
+ const watching=feature('gaze-line',g(rabbit,-40,50,.66)+g(treeBird,80,0,.7)+path('M58 104l69-42','none','#c68645',3));
+ const meeting=feature('meeting-pair',g(kid(leaf),-34,15,.86)+g(kid(blue),67,15,.86)+move('greeting','M101 92l19-18 19 18'));
+ const arrival=feature('arrival-panels',rect(8,16,100,148,'#edf1dd',12)+rect(132,16,100,148,'#edf1dd',12)+g(door(true),-22,45,.56)+g(rabbit,-8,96,.34)+g(door(true),111,45,.56)+g(rabbit,119,61,.6)+move('time-arrow','M111 88h17m-6-6 6 6-6 6'));
+ const swimming=feature('swim-trail',river+g(fish,36,53,.65)+move('motion-arrow','M72 35h75m-9-8 9 8-9 8')+path('M47 94H22M44 108H16','none',blue,3));
+ const insideWater=feature('water-interior',river+g(fish,39,45,.62)+path('M186 50v88M178 50h8M178 138h8','none',ink,3));
+ const eating=feature('eating-fruit',g(rabbit,-18,0,1)+g(apple,101,72,.3)+path('M130 129l8-12','none','#d8d1bd',9));
+ const roles=(self)=>feature(self?'point-self':'point-other',g(kid(leaf),-38,33,.8)+g(kid(blue),75,33,.8)+speech(23,2,g(person,14,5,.15))+move('role-pointer',self?'M84 92l-14 12m-1-9 1 9 9-1':'M88 97h54m-9-8 9 8-9 8'));
+ const same=feature('same-action',g(kid(leaf),-33,34,.78)+g(kid(blue),78,34,.78)+g(apple,41,91,.23)+g(apple,153,91,.23)+path('M112 49h20M112 58h20','none',ink,3));
+ const holding=feature('holding-handle',g(rabbit,-37,31,.77)+g(umbrella,61,-2,.72)+path('M82 134l65-29','none','#d8d1bd',9)+circle(148,103,5,'#f5edda'));
+ const walking=feature('walking-feet',g(rabbit,-2,-8,.9)+path('M79 143l-18 12M139 143l19-11','none',ink,5)+move('motion-arrow','M71 172h92m-9-7 9 7-9 7'));
+ const goingHome=feature('direction-home',g(rabbit,-44,43,.67)+g(house,75,24,.74)+move('motion-arrow','M84 120h39m-9-8 9 8-9 8'));
+ const clearSky=feature('clear-sky',g(sun,0,-5,.9)+g(cloud,116,58,.5)+path('M24 165q95-24 192 0','#d8e4be','none'));
+ const opening=feature('open-door',g(door(true),57,0,1)+g(rabbit,-43,48,.68)+path('M72 134l67-26','none','#d8d1bd',8));
+ const friends=feature('friend-pair',g(kid(leaf),-38,20,.85)+g(kid(blue),72,20,.85)+path('M101 110q18 15 38 0','none','#bc9275',7));
+ const group=feature('group-together',g(kid(rose),-43,39,.7)+g(kid(gold),35,24,.8)+g(kid(blue),126,39,.7)+path('M26 165q94 20 188 0','none',leaf,4));
+ const reading=feature('reading-voice',g(rabbit,-9,-11,.88)+g(book,56,91,.48)+path('M157 73l14-7M161 86h17M158 98l13 6','none',gold,4));
+ const search=feature('search-shelf',rect(114,29,111,132,'#ddc6a0')+rect(122,37,95,50,'#f8f1db')+rect(122,96,95,57,'#f8f1db')+rect(132,45,14,39,blue)+rect(151,45,13,39,rose)+rect(171,46,13,38,leaf)+g(closedBook,143,103,.25)+g(rabbit,-48,48,.68)+path('M68 111l82-37','none','#c68645',3));
+ const near=feature('point-near',g(closedBook,5,20,.9)+g(closedBook,156,5,.3)+move('near-pointer','M30 83h31m-8-7 8 7-8 7'));
+ const counter=feature('book-counter',g(closedBook,7,0,1)+path('M65 175h124M65 169v6M189 169v6','none',ink,3));
+ const progressive={
+  '兔':[rabbit,'长耳朵、短尾巴的小兔'], '门':[door(),'有门框和把手的一扇门'], '出':[leaving,'小兔从打开的门向外走，箭头指向门外'],
+  '来':[approaching,'小兔向招呼它的人走近，箭头指向说话的人'], '在':[atHome,'小兔在家里，房屋剖面展示它的位置'],
+  '鸟':[bird,'有翅膀、尖嘴和细脚的小鸟'], '树':[feature('tree-canopy',tree),'有树干和绿色树冠的大树'], '看':[watching,'小兔抬头看树上的鸟，视线连接眼睛和小鸟'],
+  '见':[meeting,'两个小朋友面对面见面、打招呼'], '了':[arrival,'先走近、后到了门口的两幅图；“来了”的变化语境，由大人讲解'],
+  '河':[river,'两岸之间流动的小河'], '鱼':[fish,'有鱼鳍、鱼尾和鳞线的小鱼'], '游':[swimming,'小鱼在河水中游动，水纹和箭头表示游来'],
+  '去':[away,'小兔离开原来的家向外走；“去”要结合说话人的位置'], '里':[insideWater,'小鱼在水里，蓝色水域包围小鱼'],
+  '果':[fruit,'碗里装着有果柄和叶子的水果'], '吃':[eating,'小兔把水果举到嘴边吃'], '你':[roles(false),'说话的人指向对方，练习“你来”；换角色后“你”也改变'],
+  '我':[roles(true),'说话的人指向自己，练习“我来”；换角色后“我”也改变'], '也':[same,'两个人同样拿起水果，表示“我吃，你也吃”的语境'],
+  '伞':[umbrella,'有伞面、伞柄和弯把手的雨伞'], '拿':[holding,'小兔伸手握着伞柄拿伞'], '走':[walking,'小兔迈开脚向前走，箭头和脚步表示移动'],
+  '回':[goingHome,'小兔沿箭头走回家，房屋是回去的目的地'], '家':[house,'有屋顶、窗户和家门的小房子'],
+  '晴':[clearSky,'天晴了，太阳明亮，天空没有雨滴'], '开':[opening,'小兔伸手把门打开，能看见门后的空间'], '朋':[friends,'两个朋友牵手相伴；“朋”在“朋友”一词中理解'],
+  '友':[friends,'两个朋友一起玩；“友”在“朋友”一词中理解'], '们':[group,'一群人在一起，表示“我们、朋友们”的语境，不靠固定角色猜字'],
+  '书':[book,'展开的书，有书脊和左右两页'], '找':[search,'小兔看向书架，在几本书中找书'], '读':[g(reading,0,9),'小兔看着打开的书，嘴边的声音线表示读书'],
+  '这':[near,'箭头指近处这本书，远处还有一本小书作对照；近指语境'], '本':[counter,'单独一本合上的书，下面括线圈定数量单位；“一本书”的语境'],
+ };
+ const vocabulary={
+  '小兔':[rabbit,'长耳朵的小兔'], '出门':[leaving,'小兔从门里走到门外'], '出来':[leaving,'小兔向门外走出来'], '来人':[feature('direction-toward',g(kid(blue),-30,30,.78)+g(kid(leaf),106,30,.78)+move('motion-arrow','M88 90h48m-9-8 9 8-9 8')),'一个人向招呼他的人走近'], '在家':[atHome,'小兔待在家里'],
+  '小鸟':[bird,'有翅膀和尖嘴的小鸟'], '大树':[feature('tree-canopy',extras.bigTree),'一大一小两棵树，展开的大树冠与小树对照'], '看见':[watching,'小兔的视线朝向树上的小鸟'], '见面':[meeting,'两个人面对面打招呼'], '来了':[arrival,'先走近、后到了门口的变化语境'],
+  '小河':[river,'两岸之间流动的河水'], '小鱼':[fish,'有鱼鳍和尾巴的小鱼'], '游来':[swimming,'鱼沿箭头在水里游动'], '回去':[goingHome,'小兔沿箭头返回原来的家'], '水里':[insideWater,'鱼被蓝色水域包围'],
+  '水果':[fruit,'碗里放着水果'], '吃水果':[eating,'小兔把水果举到嘴边'], '你来':[roles(false),'说话的人招呼对方；需要换角色练习'], '我来':[roles(true),'说话的人指向自己；需要换角色练习'], '也来':[feature('same-action',g(kid(leaf),108,25,.8)+g(rabbit,-32,5,.43)+g(rabbit,11,89,.43)+move('motion-arrow','M77 48h66m-7-6 7 6-7 6M111 139h32m-7-6 7 6-7 6')),'两个角色同样向招呼者走近，表示“也来”的语境'],
+  '雨伞':[umbrella,'伞面遮雨，弯柄可以握住'], '拿伞':[holding,'小兔的手握住伞柄'], '走来':[g(walking,-30,20,.78)+g(kid(leaf),133,50,.62),'小兔迈开脚向招呼它的人走近'], '回家':[goingHome,'小兔走向房子的家门'], '家门':[g(house,-6,0,1)+g(door(),84,80,.5),'小房子的正面有家门'],
+  '天晴':[clearSky,'有太阳、没有雨滴的天空'], '开门':[opening,'小兔伸手打开门'], '朋友':[friends,'两个伙伴牵手相伴，不固定指代某个角色'], '我们':[group,'一群人站在一起，说话人也在其中，需要换角色练习'],
+  '看书':[g(g(rabbit,-9,-11,.88)+g(book,56,91,.48),0,9),'小兔眼睛朝向打开的书页'], '找书':[search,'小兔在书架上寻找书'], '读书':[g(reading,0,9),'看着书页，嘴边声音线表示读出声音'], '这本':[near,'手势指向近处的这本书，远处一本作为对照'], '书本':[closedBook,'带书脊、封面和成叠书页的一本书'],
+ };
+ const progressiveStories=[
+  [
+   [g(leaving,13,12,1)+g(approaching,331,12,1), '小兔出门了，来到门口；有人招呼“来，小兔”，箭头指向招呼者'],
+   [g(leaving,5,13,1)+g(house,333,8,1)+g(rabbit,413,83,.5), '小兔从门内出门，随后在家门口；两幅场景对应两句话'],
+  ],[
+   [g(tree,230,-1,1.1)+g(bird,334,15,.42)+g(rabbit,215,70,.67)+feature('gaze-line',path('M305 125l82-67','none','#c68645',3)), '小兔看见了树上的小鸟；鸟在树上，小兔在树下看鸟'],
+   [g(tree,230,-1,1.1)+g(bird,334,15,.42)+g(rabbit,210,70,.67)+feature('gaze-line',path('M300 125l87-67','none','#c68645',3)), '小兔看见了鸟；鸟停在树上，小兔抬头看'],
+  ],[
+   [g(river,258,-1,1.15)+g(fish,347,66,.65)+g(rabbit,56,42,.85)+move('swim-trail','M350 43h103m-10-9 10 9-10 9M455 158H352m10-9-10 9 10 9'), '小兔来到河边，看小鱼在河里游，箭头表示游来游去'],
+   [g(river,171,-5,1.25)+g(fish,225,53,.9)+move('swim-trail','M254 38h111m-10-9 10 9-10 9M369 161H258m10-9-10 9 10 9'), '小鱼在河里游，两个相反方向的箭头表示游来游去'],
+  ],[
+   [g(eating,39,28,.9)+g(bird,319,44,.85)+g(apple,420,114,.3)+speech(170,13,g(apple,15,1,.21))+speech(378,10,g(apple,15,1,.21)), '小兔说“我吃水果”，小鸟回应“你吃，我也吃”；双方都拿水果，需成人交换说话角色'],
+   [g(same,121,-6,1.15)+g(fruit,399,61,.55), '两个角色都吃水果，对应“我吃水果，你也吃水果”；我和你随说话角色改变'],
+  ],[
+   [g(rain,-14,-11,.72)+g(holding,133,24,.9)+g(house,378,17,.94)+g(bird,13,89,.49)+move('direction-home','M309 151h78m-9-8 9 8-9 8'), '下雨了，小兔拿伞走回家，小鸟在后面招呼“回家吧”'],
+   [g(rain,3,-14,.75)+g(holding,141,24,.9)+g(house,379,17,.94)+move('direction-home','M312 151h75m-9-8 9 8-9 8'), '下雨了，小兔握着雨伞，沿箭头走回家'],
+  ],[
+   [g(sun,3,-5,.65)+g(group,9,49,.7)+g(opening,261,13,1)+g(book,462,108,.48), '天晴了，朋友们来了，小兔开门迎接，邀请我们一起看书'],
+   [g(sun,3,-5,.65)+g(group,9,49,.7)+g(opening,289,13,1), '天晴了，朋友们来到门前，小兔打开门迎接'],
+  ],[
+   [g(search,3,15,.95)+g(reading,255,13,.95)+g(group,454,63,.6)+move('near-pointer','M470 143h-24m8-7-8 7 8 7'), '小兔从书架找来一本书，朋友指着这本书，请小兔读，朋友们看'],
+   [g(search,1,15,.95)+g(near,235,55,.55)+g(reading,351,22,.85)+g(group,473,79,.48), '先找书，再读这本书；小兔读，朋友们一起看书'],
+  ],
+ ];
+ function progressiveStory(day,index){
+  const entry=progressiveStories[day-1]?.[index];
+  if(!entry)throw new RangeError('No progressive teaching scene for this lesson');
+  return svg(rect(0,0,600,200,'#e9f2e4',20)+path('M0 167Q150 145 300 169T600 158V200H0Z','#d8e4be','none')+entry[0],entry[1],'0 0 600 200','story-art',`data-scene="sprout-3-${day}-${index}"`);
+ }
+
  const safe=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- function svg(shape,label,view='0 0 240 180',className='character-art'){return `<svg class="${className}" xmlns="http://www.w3.org/2000/svg" viewBox="${view}" role="img" aria-label="${safe(label)}"><title>${safe(label)}</title>${shape}</svg>`;}
- function character(char){return svg(shapes[char]||tree,labels[char]||'一棵小树');}
- function word(word,char){const key=words[word]||char;return svg(extras[key]||shapes[key]||tree,word+'的配图');}
+ function svg(shape,label,view='0 0 240 180',className='character-art',attributes=''){return `<svg ${attributes?attributes+' ':''}class="${className}" xmlns="http://www.w3.org/2000/svg" viewBox="${view}" role="img" aria-label="${safe(label)}"><title>${safe(label)}</title>${shape}</svg>`;}
+ function character(char){const entry=progressive[char];return entry?svg(entry[0],entry[1],'0 0 240 180','character-art',`data-character="${safe(char)}"`):svg(shapes[char]||tree,labels[char]||'一棵小树');}
+ function word(word,char){const entry=vocabulary[word];if(entry)return svg(entry[0],word+'：'+entry[1],'0 0 240 180','character-art',`data-word="${safe(word)}"`);const key=words[word]||char;return svg(extras[key]||shapes[key]||tree,word+'的配图');}
  function mascot(kind='listen'){
   const expression=kind==='success'?path('M99 111q21 24 42 0','none',ink,5):kind==='try'?path('M102 117q18-12 36 0','none',ink,4):path('M104 114q16 15 32 0','none',ink,4);
   const body=ellipse(120,113,52,43,'#d2dcb1')+path('M121 75V43','none',ink,5)+path('M121 57Q82 55 88 28Q119 28 121 57M122 48Q149 46 151 21Q123 24 122 48',leaf,ink,3)+circle(102,102,4,ink)+circle(139,102,4,ink)+expression+ellipse(87,115,8,4,'#e9b49b')+ellipse(154,115,8,4,'#e9b49b');
   const detail=kind==='listen'?path('M63 101v-9a57 57 0 0 1 114 0v9','none',blue,7)+rect(55,94,15,30,blue)+rect(170,94,15,30,blue):kind==='success'?path('M183 78l12 12 22-30','none','#528663',8):path('M190 79q17-21 29 0q8 11-10 21v8','none','#c38c50',5)+circle(208,121,3,'#c38c50');
   return svg(body+detail,kind==='success'?'小芽笑着鼓励你':kind==='try'?'小芽陪你再想一想':'小芽戴着耳机认真听声音','0 0 240 180','sprout-mascot');
  }
- function story(day,index=0){
+ function story(day,index=0,version='sprout-2'){
+  if(version==='sprout-3')return progressiveStory(day,index);
   const cabin=rect(82,75,80,78,'#efdaad',10)+path('M68 79l54-47 55 47','#b78e65','#976d4e',4)+rect(112,110,24,43,'#7ea178',8);
   const ground=path('M0 161Q150 135 300 164T600 151V210H0Z','#d8e4be','none');
   let scene='';

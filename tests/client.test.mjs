@@ -328,3 +328,33 @@ test('manual parent-page pending synchronization leaves settings controls editab
  for(const name of ['target-characters','target-date','daily-new','reference-minutes','save-target'])assert.equal(e.document.elements.get(name).disabled,false,name+' stayed disabled after sync');
  fillSettings(e);await e.run('saveSettings({preventDefault(){}})');assert.equal(e.run('state.settings.target_characters'),1500);
 });
+
+test('progressive learning, options and both sentences use exact semantic art; listening stays neutral',async t=>{
+ const e=await setup(t,'sprout-3');
+ for(let day=1;day<=7;day++){
+  const tasks=JSON.parse(e.run(`JSON.stringify(course.lessons[${day}])`));
+  for(let i=0;i<tasks.length;i++){
+   const task=tasks[i];
+   e.run(`selectedDay=${day};state.courses['sprout-3'].positions['${day}']=${i};renderLesson()`);
+   const html=e.document.elements.get('main').innerHTML;
+   if(task.kind==='learn'){
+    assert.match(html,new RegExp(`data-character="${task.char}"`));
+    assert.doesNotMatch(html,/class="sprout-mascot"/);
+   }
+   if(task.kind==='match'){
+    assert.equal((html.match(/class="option-picture"/g)||[]).length,task.options.length);
+    for(const option of task.options)assert.ok(html.includes(e.run(`SproutArt.word(${JSON.stringify(option)},'')`)),option);
+   }
+   if(task.kind==='sentence'){
+    const index=e.run(`course.days[${day-1}].sentences.indexOf(${JSON.stringify(task.text)})`);
+    assert.match(html,new RegExp(`data-scene="sprout-3-${day}-${index}"`));
+   }
+   if(task.kind==='listen'||task.kind==='review'){
+    const image=html.match(/<div class="listening-mascot">([\s\S]*?)<\/div>/)?.[1];
+    assert.ok(image);assert.match(image,/耳机/);
+    assert.doesNotMatch(image,/data-character|data-word|data-scene|rabbit|fish|book|兔|鱼|书/);
+    assert.doesNotMatch(html,/option-picture/);
+   }
+  }
+ }
+});
