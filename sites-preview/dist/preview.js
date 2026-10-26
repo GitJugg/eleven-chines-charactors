@@ -36,15 +36,18 @@
  function submit(d,catalog,e,now=new Date().toISOString()){
   const keys=['id','course_version','lesson_id','run_id','step','answer','mode','occurred_at','client_timezone','generation'];
   if(!e||Object.keys(e).sort().join()!==keys.sort().join()||typeof e.id!=='string'||e.id.length<8||e.id.length>100||typeof e.run_id!=='string'||!/^[A-Za-z0-9_-]{1,80}$/.test(e.run_id)||!['adult','silent','audio'].includes(e.mode))fail('无效预览记录');
-  const {day,t}=taskFor(catalog,e);
+  const {c,day,t}=taskFor(catalog,e);
   if(t.options?!t.options.includes(e.answer):e.answer!==null)fail('无效答案');
   const previous=d.events.find(x=>x.event.id===e.id);
   if(previous){if(canonical(previous.event)!==canonical(e))fail('重复标识内容不同');return;}
   if(e.generation!==d.generation)fail('本机进度代次已改变');
   // A first run may start at any lesson. Only a repeat requires its own completed first run.
   if(e.run_id!=='main'&&!rewarded(d,catalog,e.course_version,day.day))fail('请先完成这一课，再开始重复练习');
-  const count=d.events.filter(x=>x.event.course_version===e.course_version&&x.event.lesson_id===e.lesson_id&&x.event.run_id===e.run_id).length;
-  if(count!==e.step)fail('本机进度已改变，请重新读取');
+  // Keep immutable catalog indices. Legacy intro events remain valid, but new
+  // clients may omit only warmup steps; no synthetic learning record is added.
+  const previousSteps=d.events.filter(x=>x.event.course_version===e.course_version&&x.event.lesson_id===e.lesson_id&&x.event.run_id===e.run_id);
+  const next=previousSteps.length?previousSteps.at(-1).event.step+1:0;
+  if(e.step<next||c.lessons[day.day].slice(next,e.step).some(t=>t.kind!=='warmup'))fail('本机进度已改变，请重新读取');
   let stamp=Date.parse(e.occurred_at),basis='client_reported';
   const rawDate=typeof e.occurred_at==='string'?e.occurred_at.slice(0,10):'', dateValid=/^\d{4}-\d{2}-\d{2}$/.test(rawDate)&&Number.isFinite(Date.parse(rawDate+'T00:00:00Z'))&&new Date(rawDate+'T00:00:00Z').toISOString().slice(0,10)===rawDate;
   try{new Intl.DateTimeFormat('en',{timeZone:e.client_timezone});}catch(_){stamp=NaN;}
@@ -54,10 +57,10 @@
  function state(d,catalog,now=new Date().toISOString()){
   const today=dateKey(now),date=new Date(today+'T12:00:00Z'),weekday=(date.getUTCDay()+6)%7;date.setUTCDate(date.getUTCDate()-weekday);const week=date.toISOString().slice(0,10),courses={},runs=[];
   for(const c of catalog.courses){const entries=d.events.filter(x=>x.event.course_version===c.version),positions={},stats={},rewards=[];
-   for(const day of c.days){positions[day.day]=entries.filter(x=>x.day===day.day&&x.event.run_id==='main').length;if(rewarded(d,catalog,c.version,day.day))rewards.push(day.day);}
+   for(const day of c.days){positions[day.day]=(entries.filter(x=>x.day===day.day&&x.event.run_id==='main').at(-1)?.event.step??-1)+1;if(rewarded(d,catalog,c.version,day.day))rewards.push(day.day);}
    for(const x of entries){if(x.correct!==null&&x.character){const s=stats[x.character]||{attempts:0,correct:0,wrong:0,status:'learning'};s.attempts++;s.correct+=x.correct;s.wrong=s.attempts-s.correct;s.status=s.wrong?'revisit':'learning';stats[x.character]=s;}
     let run=runs.find(r=>r.course_version===c.version&&r.day===x.day&&r.run_id===x.event.run_id);
-    if(!run){run={course_version:c.version,day:x.day,lesson_id:x.event.lesson_id,run_id:x.event.run_id,position:0,complete:false};runs.push(run);}run.position++;run.complete=run.position===c.lessons[x.day].length;
+    if(!run){run={course_version:c.version,day:x.day,lesson_id:x.event.lesson_id,run_id:x.event.run_id,position:0,complete:false};runs.push(run);}run.position=x.event.step+1;run.complete=run.position===c.lessons[x.day].length;
    }courses[c.version]={positions,stats,rewards};
   }
   const weekly=d.events.filter(x=>x.date>=week&&x.date<=today);

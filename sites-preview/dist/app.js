@@ -8,7 +8,14 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const id=()=>globalThis.crypto?.randomUUID?.() || 'event-'+Date.now().toString(36)+'-'+Array.from(crypto.getRandomValues(new Uint32Array(3))).join('-');
 function progressState(){return state?.courses?.[course?.version]||state;}
 function currentDay(){return selectedDay || course?.days.find(d=>!progressState().rewards.includes(d.day))?.day || course?.days.at(-1)?.day || 1;}
-function currentPosition(){return activeRun==='main'?progressState().positions[currentDay()]:state.runs.find(r=>r.course_version===course.version&&r.day===currentDay()&&r.run_id===activeRun)?.position||0;}
+// Raw indices are persisted identities; presentation hides only obsolete intros.
+function currentPosition(){
+ let position=(activeRun==='main'?progressState().positions[currentDay()]:state.runs.find(r=>r.course_version===course.version&&r.day===currentDay()&&r.run_id===activeRun)?.position)||0;
+ const tasks=course.lessons[currentDay()];
+ while(tasks[position]?.kind==='warmup')position++;
+ return position;
+}
+function visibleTasks(day){return course.lessons[day].filter(t=>t.kind!=='warmup');}
 function currentTask(){return course.lessons[currentDay()][currentPosition()];}
 function route(){return (location.hash.slice(1)||'home').split('/')[0];}
 function chooseCourse(version){
@@ -119,7 +126,7 @@ function renderHome(){
 }
 function renderOverview(){
  const day=currentDay(),d=course.days.find(x=>x.day===day);if(!d)return go('home');
- const p=progressState(),tasks=course.lessons[day],review=[...new Set(tasks.filter(t=>t.kind==='review').map(t=>t.char))];
+ const p=progressState(),tasks=visibleTasks(day),review=[...new Set(tasks.filter(t=>t.kind==='review').map(t=>t.char))];
  const kinds={warmup:'听一听，准备出发',review:'听音温习汉字',learn:'认识汉字和词语',listen:'听音找汉字',match:'词语配对',sentence:'听读故事和句子',comprehension:'回答故事问题',component:'发现字形联系',roleplay:'换个角色说一说',reward:'收下学习小花'};
  const activities=[...new Set(tasks.map(t=>kinds[t.kind]||t.title))];
  main.innerHTML=`<section class="lesson-overview"><div class="eyebrow">${esc(course.title)} · 第 ${day} 课</div><h1>${esc(d.title)}</h1><p>先看看这一课，喜欢就出发。</p><div class="actions"><button class="quiet" id="overview-back">返回课程列表</button><button class="primary" id="overview-start">${p.rewards.includes(day)?'这一课再练一次':p.positions[day]>0?'接着学这一课':'从这一课开始'}</button></div><p class="subtle">查看内容不会记为学习或完成。不用先学前面的课，也不会替你完成跳过的课。</p><section class="overview-words" aria-label="本课汉字和词语">${d.words.map(w=>`<article class="overview-word"><strong class="char">${esc(w.char)}</strong><span class="word">${esc(w.word)}</span></article>`).join('')}</section><section class="overview-story"><h2>这一课读什么</h2>${d.sentences.map(text=>`<p class="sentence">${esc(text)}</p>`).join('')}</section>${review.length?`<p class="subtle">本课也会温习：${review.map(esc).join('、')}。没学过也可以跟着朗读认识，不影响从本课开始。</p>`:''}<section class="overview-activities"><h2>会玩哪些练习</h2><ul>${activities.map(label=>`<li>${esc(label)}</li>`).join('')}</ul><p class="subtle">共 ${tasks.length} 小步，可以中途休息，之后接着学。</p></section></section>`;
@@ -127,7 +134,7 @@ function renderOverview(){
  document.querySelector('#overview-start').onclick=()=>p.rewards.includes(day)?startPractice(day):startLesson(day);
 }
 function renderLesson(){
- const day=currentDay(),d=course.days[day-1],step=currentPosition(),t=currentTask(),total=course.lessons[day].length;
+ const day=currentDay(),d=course.days[day-1],rawStep=currentPosition(),step=course.lessons[day].slice(0,rawStep).filter(t=>t.kind!=='warmup').length,t=currentTask(),total=visibleTasks(day).length;
  if(!t)return go('home');
  const spokenTitle=(t.kind==='listen'||t.kind==='review')?'听声音，找汉字':t.kind==='sentence'?'听故事，读句子':t.title;
  const type={warmup:'出发前，听一听',review:'先见见老朋友',learn:'认识新朋友',listen:'小耳朵时间',match:'词语配对',sentence:'读一个小故事',reward:'每次尝试，都值得鼓励',comprehension:'读懂小故事',component:'发现字形小联系',roleplay:'换个角色说一说'}[t.kind];

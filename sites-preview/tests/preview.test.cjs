@@ -13,3 +13,28 @@ test('page integrates adapter, scopes queues, and never presents NAS backup/sync
 test('tampered saved event summaries fail closed rather than award flowers or move dates',()=>{const p=load(),d=p.createDocument();p.submit(d,catalog,event(d),now);d.events[0].kind='reward';assert.throws(()=>p.validateDocument(d,catalog));});
 test('calendar-invalid client timestamp falls back rather than silently rolling into March',()=>{const p=load(),d=p.createDocument();p.submit(d,catalog,{...event(d),occurred_at:'2026-02-30T00:00:00Z'},now);assert.equal(d.events[0].date,'2026-10-26');assert.equal(d.events[0].basis,'preview_device_saved');});
 test('device audio events save without falsely confirming mastery',()=>{const p=load(),d=p.createDocument();p.submit(d,catalog,{...event(d),mode:'audio'},now);assert.equal(p.state(d,catalog,now).mastery.confirmed,0);assert.deepEqual(plain(p.calendar(d,catalog,'2026-10',null,now).days.find(x=>x.steps).modes),['audio']);});
+test('new runs skip intro without synthetic records and retain raw task indices through reward and repeat',()=>{
+ const p=load(),d=p.createDocument(),c=catalog.courses.find(c=>c.version==='sprout-3'),tasks=c.lessons[1];
+ assert.throws(()=>p.submit(d,catalog,event(d,'sprout-3',1,2),now),'cannot skip first real card');
+ for(const run of ['main','repeat']){
+  tasks.forEach((t,i)=>{if(t.kind!=='warmup')p.submit(d,catalog,event(d,'sprout-3',1,i,run),now);});
+  const s=p.state(d,catalog,now),r=s.runs.find(r=>r.run_id===run);
+  assert.equal(r.complete,true);assert.equal(r.position,tasks.length);
+  p.validateDocument(d,catalog);
+ }
+ assert.equal(d.events.length,(tasks.length-1)*2);
+ assert.equal(d.events[0].event.step,1);assert.equal(d.events[0].character,'兔');
+ assert.ok(d.events.every(x=>x.kind!=='warmup'));
+ assert.equal(p.state(d,catalog,now).calendar.today_steps,d.events.length);
+ assert.deepEqual(plain(p.state(d,catalog,now).courses['sprout-3'].rewards),[1]);
+});
+test('historical intro and retried queued intro retain identity and resume first real card',()=>{
+ const p=load(),d=p.createDocument(),intro=event(d);
+ p.submit(d,catalog,intro,now);const saved=JSON.stringify(d.events);
+ p.validateDocument(d,catalog);p.submit(d,catalog,intro,now);
+ assert.equal(JSON.stringify(d.events),saved);
+ assert.equal(p.state(d,catalog,now).courses['sprout-3'].positions[1],1);
+ p.submit(d,catalog,event(d,'sprout-3',1,1),now);p.validateDocument(d,catalog);
+ assert.equal(d.events[1].kind,'learn');assert.equal(d.events[1].character,'兔');
+ assert.equal(p.state(d,catalog,now).courses['sprout-3'].positions[1],2);
+});
