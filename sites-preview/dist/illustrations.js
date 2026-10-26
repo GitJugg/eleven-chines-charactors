@@ -135,6 +135,88 @@
   '去河里游':[g(river,0,0,1)+g(fish,57,59,.6)+move('swim-trail','M82 39h81m-9-8 9 8-9 8'),'小鱼在河里沿箭头游动'],
  };
  function comprehensionOption(option){const entry=comprehensionChoices[option];return entry?svg(entry[0],entry[1],'0 0 240 180','character-art',`data-comprehension-option="${safe(option)}"`):null;}
+ // Living-unit illustrations (lessons 8–15). Relational words stay in a
+ // meaningful sentence scene; a picture is a scaffold, not a definition.
+ const heart=path('M120 148L53 86C20 49 73 15 120 61C168 15 220 49 187 86Z',rose,ink,3);
+ const shirt=feature('shirt',path('M83 38L48 66l23 32 20-15v76h60V83l20 15 23-32-37-28-16 17h-24Z',blue,ink,4));
+ const bed=feature('bed-frame',rect(25,91,190,55,'#b9e9e3',10)+rect(26,51,15,112,soil)+rect(199,87,15,76,soil)+rect(46,76,53,25,'#fffaf0',8)+rect(100,89,97,44,blue,7));
+ const towel=feature('woven-towel',rect(57,28,126,130,'#a8ece0',7)+path('M66 47h108M66 137h108M66 146h108','none',leaf,3)+Array.from({length:9},(_,i)=>path(`M${65+i*13} 158v9`,'none',leaf,3)).join(''));
+ const squareCloth=feature('square-cloth',rect(59,29,122,122,'#c4f5e9',7)+path('M70 40h100v100H70Z','none',leaf,2));
+ const tooth=feature('tooth',path('M119 43C77 19 44 41 61 83C70 109 66 158 88 158C103 159 105 115 120 116C134 115 139 159 153 158C177 158 171 109 181 83C197 40 161 19 119 43Z','#fffef6',ink,4)+path('M103 45q17 10 34-1','none','#a9d7df',3));
+ const basin=feature('wash-basin',path('M35 113h169q-13 45-85 45q-68 0-84-45','#b8e9ef',ink,4)+path('M134 40V25h40v20h-23v19','none',ink,7)+path('M151 69v28M142 74v20M160 74v20','none',blue,4));
+ const washHands=feature('wash-hands',basin+g(hand,38,51,.43)+g(hand,97,63,.37));
+ const face=feature('face',circle(120,86,60,'#f5edda')+ellipse(100,72,6,8,ink)+ellipse(142,72,6,8,ink)+path('M103 111q17 17 35 0','none',ink,4)+circle(85,99,9,'#efc3b4')+circle(157,99,9,'#efc3b4'));
+ const washingFace=feature('wash-face',g(rabbit,-24,-5,.9)+g(basin,56,82,.66)+path('M86 82q-11 15 0 19q11-4 0-19M139 80q-11 15 0 19q11-4 0-19',blue,'none'));
+ const wipingFace=feature('wipe-face',g(rabbit,-10,-3,.95)+g(towel,96,64,.4)+path('M86 125l53-13','none','#d8d1bd',9));
+ const bowl=feature('bowl',ellipse(120,80,84,22,'#eafff8')+path('M36 80q8 82 84 82q76 0 84-82Z','#a0e1d0',ink,4)+ellipse(120,80,84,22,'#eafff8')+path('M40 81q80 36 160 0','none',ink,3));
+ const riceBowl=feature('rice-bowl',bowl+ellipse(120,71,68,23,'#fffef4')+Array.from({length:15},(_,i)=>ellipse(68+(i%5)*25,61+Math.floor(i/5)*10,7,2,'#cfd9ce')).join(''));
+ const grain=(x,y,rx,ry)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#fffef4" stroke="#7ca995" stroke-width="2"/>`;
+ const riceGrains=feature('rice-grains',grain(62,70,20,7)+grain(119,52,21,8)+grain(174,80,20,8)+grain(90,118,22,8)+grain(151,128,21,8)+path('M45 71h31M102 53h31M157 81h31M73 119h34M134 129h34','none','#9abfae',2));
+ const bread=feature('bread-slice',path('M58 65C30 16 99 14 120 32C147 14 211 18 183 65V153H58Z','#edbf70',ink,4)+path('M73 73C54 42 99 33 120 48C146 32 185 43 168 73V138H73Z','#ffe8af','#d69f53',2)+circle(97,89,4,'#e4b971')+circle(143,112,5,'#e4b971')+circle(117,127,3,'#e4b971'));
+ const bun=feature('steamed-bun',path('M120 38C108 59 52 55 45 111C38 160 202 160 196 111C190 57 136 57 120 38Z','#fff1cf',ink,4)+path('M120 44q-31 35-29 59M120 44v61M120 44q33 31 33 58','none','#d6bd90',3));
+ const cup=feature('water-cup',rect(61,43,111,114,'#c7eff7',8)+path('M173 65h13q41 30 0 59h-13','none',ink,7)+rect(69,88,95,59,blue,4)+path('M71 87q45 11 91 0','none','#fffaf0',3)+path('M61 43h111','none',ink,4));
+ const chopsticks=feature('chopsticks',path('M77 153L111 26M105 157L143 27','none',soil,9)+path('M83 131l20-75M111 135l22-78','none',gold,2));
+ const spoon=feature('spoon',ellipse(129,54,30,39,'#bbdce4')+path('M122 88l-18 66q-1 14 13 15q13-1 15-13l7-68','#bbdce4',ink,3)+ellipse(129,54,30,39,'none')+path('M110 38q-15 34 7 46','none',ink,3));
+ const soup=feature('soup-bowl',bowl+ellipse(120,79,66,15,'#f4ce78')+g(spoon,79,-9,.6));
+ const chair=feature('chair',rect(64,25,101,73,'#c5e5c5',8)+path('M68 94v69M161 94v69M63 106h107','none',soil,9)+rect(60,92,112,23,'#d9b77e',5));
+ const desk=feature('desk',rect(26,76,188,24,soil,6)+path('M43 99v67M194 99v67','none',soil,13)+rect(50,105,92,35,'#e8c996',5)+circle(97,122,4,ink));
+ const sitting=feature('sit-on-chair',g(chair,15,45,.8)+g(rabbit,10,0,.8));
+ const readingAtDesk=feature('reading-at-desk',g(chair,30,36,.8)+g(rabbit,-18,-13,.9)+g(desk,54,53,.73)+g(book,94,70,.42));
+ const puttingBook=feature('put-book-on-table',g(desk,0,15,1)+g(closedBook,95,-12,.43)+g(hand,-3,-3,.45)+move('put-down','M143 52v29m-8-8 8 8 8-8'));
+ const dressed=feature('put-on-shirt',g(rabbit,-9,-8,.95)+g(shirt,42,77,.48)+move('shirt-down','M193 42v32m-8-8 8 8 8-8'));
+ const waking=feature('get-out-of-bed',g(bed,-25,26,.8)+g(rabbit,98,26,.72)+move('getting-up','M141 136v-42m-8 8 8-8 8 8'));
+ const morning=feature('morning-sun',g(sun,-20,4,.75)+rect(23,118,192,8,'#a2e5c9')+g(bed,115,91,.4));
+ const drink=feature('drink-water',g(rabbit,-24,-4,.93)+g(cup,113,63,.39)+path('M91 121l52-16','none','#d8d1bd',9));
+ const eatMeal=feature('eat-rice',g(rabbit,-35,-9,.92)+g(riceBowl,91,84,.52)+g(chopsticks,100,21,.48));
+ const useSpoon=feature('use-spoon',g(bowl,-15,23,.92)+ellipse(95,94,57,13,'#f4ce78')+g(spoon,49,5,.7)+g(hand,120,69,.30));
+ const familyRabbit=(role,color)=>feature('family-'+role,rabbit+g(shirt,62,105,.28)+(role==='grandpa'||role==='grandma'?path('M91 61q28-18 56 0','none','#b9c6ca',9)+path('M115 83a10 10 0 1 1-20 0a10 10 0 1 1 20 0M145 83a10 10 0 1 1-20 0a10 10 0 1 1 20 0','none',ink,2)+path('M115 83h10','none',ink,2):'')+(role==='grandpa'?path('M105 118q15 14 29 0','none','#b9c6ca',6):'')+rect(99,126,40,25,color,4));
+ const father=familyRabbit('father',blue),mother=familyRabbit('mother',rose),grandpa=familyRabbit('grandpa',leaf),grandma=familyRabbit('grandma',gold);
+ const familyFour=feature('four-family-members',g(father,-14,30,.5)+g(mother,42,30,.5)+g(grandpa,98,30,.5)+g(grandma,154,30,.5));
+ const loveFamily=feature('love-family',g(familyFour,0,42,1)+g(heart,73,-12,.42));
+ const together=feature('together',g(rabbit,-35,35,.72)+g(bird,93,49,.64)+g(book,69,112,.4)+path('M38 169h165','none',leaf,4));
+ const speaking=feature('speaking',g(rabbit,-25,26,.8)+speech(122,14,g(closedBook,14,1,.2))+path('M116 81l16-7M118 94h19','none',gold,4));
+ const possess=feature('possession',g(rabbit,-30,4,.9)+g(closedBook,103,73,.5)+path('M82 128l54-5','none','#d8d1bd',8));
+ const identity=feature('identity',g(roles(true),0,8,.91));
+ const ownership=feature('ownership',possess+path('M50 162q63 18 132-4','none',leaf,4));
+ const negation=feature('negation',g(reading,-29,12,.83)+g(door(true),133,17,.4)+path('M163 29l49 55M212 29l-49 55','none',rose,6));
+ const degree=feature('degree',g(closedBook,-6,-2,1.08)+g(closedBook,171,102,.3)+move('very-big','M36 25v134m-8-8 8 8 8-8M28 33l8-8 8 8'));
+ const desire=feature('desire',g(rabbit,-25,33,.75)+circle(126,72,4,'white')+circle(137,58,6,'white')+ellipse(174,33,48,29,'white')+g(book,151,9,.2));
+ const livingCharacters={
+  '一':[counter,'只有一本书，括线圈定一个物体'], '只':[feature('one-animal',bird+path('M38 168h164','none',leaf,4)),'一只小鸟，量词只与动物一起理解'], '和':[together,'小兔和小鸟一起看同一本书'], '说':[speaking,'小兔张口说话，气泡里是它谈到的书'], '有':[possess,'小兔手里有一本书'],
+  '是':[identity,'说话的人指向自己，配合语音理解“是我”'], '的':[ownership,'小兔拿着自己的书，用连线表示“我的书”的所属关系'], '不':[negation,'小兔读书，不出门；门上的交叉线表示否定'], '很':[degree,'一本明显很大的书，与小书并排比较'], '要':[desire,'小兔想着读书，想法气泡中有一本书'],
+  '爸':[father,'穿蓝衣的兔爸爸，家庭角色由故事和语音介绍'], '妈':[mother,'穿珊瑚色衣服的兔妈妈，家庭角色由故事和语音介绍'], '爷':[grandpa,'戴眼镜、留灰胡子的兔爷爷'], '奶':[grandma,'戴眼镜、灰发的兔奶奶'], '爱':[loveFamily,'家人相聚，爱心表示对家人的关爱'],
+  '早':[morning,'太阳刚升起，小床旁是早上的光线'], '起':[waking,'小兔离开床起身，向上箭头表示起床'], '床':[bed,'有床头、枕头和被子的小床'], '穿':[dressed,'小兔把衣服穿到身上'], '衣':[shirt,'有领口、衣袖和衣身的一件衣服'],
+  '洗':[washHands,'水龙头下两只手正在洗手'], '脸':[face,'清楚可见眼睛、嘴和脸颊的一张脸'], '牙':[tooth,'一颗有牙冠和牙根的白牙'], '毛':[towel,'有织纹和流苏的毛巾，在毛巾一词中理解毛'], '巾':[squareCloth,'一块方形的小巾'],
+  '饭':[eatMeal,'小兔拿筷子吃碗里的米饭'], '米':[riceGrains,'五粒细长米粒的放大图'], '面':[bread,'切开后露出松软内部的面包'], '包':[bun,'顶部有褶子的圆包子'], '喝':[drink,'小兔把水杯举到嘴边喝水'],
+  '碗':[bowl,'敞口、矮圆、没有把手的小碗'], '筷':[chopsticks,'两根并排细长的筷子'], '勺':[spoon,'椭圆勺头和长勺柄的勺子'], '杯':[cup,'有把手、装着水的高杯子'], '用':[useSpoon,'手握勺柄，用勺子舀汤'],
+  '坐':[sitting,'小兔坐在椅子上，身体由座面支撑'], '椅':[chair,'有靠背、座面和椅腿的椅子'], '桌':[desk,'有桌面、桌腿和抽屉的书桌'], '放':[puttingBook,'手把书放到桌面，箭头向下指向桌面'], '好':[feature('good-book',reading+g(heart,151,9,.22)),'小兔喜欢读这本书，用好书表达评价而非固定物体'],
+ };
+ Object.assign(progressive,livingCharacters);
+ const livingWords={
+  '一本':['一'], '一只':['只'], '我和你':['和'], '说一说':['说'], '有书':['有'], '是我':['是'], '我的':['的'], '不去':['不'], '很大':['很'], '要读':['要'],
+  '爸爸':['爸'], '妈妈':['妈'], '爷爷':['爷'], '奶奶':['奶'], '爱家':['爱'], '早上':['早'], '起床':['起'], '小床':['床'], '穿衣':['穿'], '衣服':['衣'],
+  '洗手':['洗'], '小脸':['脸'], '牙齿':['牙'], '毛巾':['毛'], '方巾':['巾'], '吃饭':['饭'], '米饭':[null,riceBowl,'碗里装着一粒粒白米饭'], '面包':['面'], '包子':['包'], '喝水':['喝'],
+  '小碗':['碗'], '筷子':['筷'], '勺子':['勺'], '水杯':['杯'], '用勺':['用'], '坐下':['坐'], '椅子':['椅'], '书桌':['桌'], '放好':['放'], '好书':['好'],
+ };
+ for(const [word,entry] of Object.entries(livingWords))vocabulary[word]=entry[0]?livingCharacters[entry[0]]:[entry[1],entry[2]];
+ Object.assign(comprehensionChoices,{
+  '一本书':[closedBook,'只有一本书'], '一把伞':[umbrella,'只有一把伞'], '一条鱼':[fish,'只有一条小鱼'],
+  '读书':[reading,'小兔看着书页朗读'], '出门':[leaving,'小兔从门内走向门外'], '游水':[swimming,'小鱼在水里游动'],
+  '爸爸妈妈和爷爷奶奶':[familyFour,'四位家人：爸爸、妈妈、爷爷、奶奶'], '只有爸爸':[father,'只有穿蓝衣的兔爸爸'], '只有小鸟':[bird,'只有一只小鸟'],
+  '穿衣':[dressed,'小兔正在穿衣服'], '吃水果':[eating,'小兔把水果举到嘴边吃'], '毛巾':[towel,'有织纹和流苏的毛巾'], '书本':[closedBook,'带封面和书页的一本书'],
+  '面包':[bread,'一片方形圆顶的面包'], '米饭':[riceBowl,'碗里装着米饭'], '水':[g(cup,-15,10,.85)+path('M194 44q-18 26 0 32q18-6 0-32',blue,'none'),'水杯里的蓝色水和一滴水'], '椅子上':[sitting,'小兔坐在椅子上'],
+ });
+ const livingStories=[
+  [[g(together,23,14,1)+g(possess,334,8,1),'小兔有一本书，小兔和一只小鸟一起看书'],[g(speaking,10,13,1)+g(together,326,14,1),'小兔说自己有书，小兔和小鸟一起看书']],
+  [[g(degree,3,8,.95)+g(negation,281,15,1.04),'小兔的书很大，小兔选择在家读书而不出门'],[g(ownership,9,11,1)+g(desire,313,12,1),'这是我的书，我要读书，不出门']],
+  [[g(familyFour,4,15,1.35)+g(rabbit,416,53,.75)+g(heart,454,2,.35),'爸爸、妈妈、爷爷、奶奶都来到小兔家，小兔爱自己的家人'],[g(familyFour,4,15,1.35)+g(loveFamily,383,13,.9),'四位家人来到家里，小兔爱家人']],
+  [[g(morning,3,12,.88)+g(waking,209,11,.95)+g(dressed,397,11,.9),'早上先起床，再穿衣，三幅场景从左到右'],[g(waking,28,9,1)+g(dressed,324,9,1),'小兔起床后穿衣，准备出门']],
+  [[g(tooth,10,25,.75)+g(washingFace,193,11,.94)+g(wipingFace,389,12,.94),'先刷牙，再洗脸，然后拿毛巾擦脸'],[g(washingFace,43,8,1)+g(wipingFace,322,8,1),'小兔洗脸，拿起毛巾擦脸']],
+  [[g(rabbit,0,7,.92)+g(bread,97,89,.43)+g(bird,246,21,.85)+g(riceBowl,343,105,.42)+g(drink,425,28,.8),'小兔吃面包，小鸟吃米饭，随后小兔喝水；食物分别放在对应角色前'],[g(rabbit,13,11,.92)+g(bread,118,91,.43)+g(bird,315,30,.8)+g(riceBowl,412,104,.42),'小兔吃面包，小鸟吃米饭']],
+  [[g(riceBowl,0,35,.9)+g(chopsticks,135,17,.65)+g(soup,250,36,.9)+g(cup,401,27,.8),'碗里有米饭，旁边是筷子和汤勺，杯里有水；容器与用途清晰区分'],[g(riceBowl,60,24,1)+g(cup,337,21,1),'碗里有米饭，杯里有水']],
+  [[g(puttingBook,12,10,.95)+g(readingAtDesk,313,15,1),'先把书放到桌上，再坐在椅子上看书'],[g(readingAtDesk,13,14,1)+g(puttingBook,319,10,.95),'小兔坐好读书，读完后把书放好']],
+ ];
+
  const progressiveStories=[
   [
    [g(leaving,13,12,1)+g(approaching,331,12,1), '小兔出门了，来到门口；有人招呼“来，小兔”，箭头指向招呼者'],
@@ -159,6 +241,7 @@
    [g(search,1,15,.95)+g(near,235,55,.55)+g(reading,351,22,.85)+g(group,473,79,.48), '先找书，再读这本书；小兔读，朋友们一起看书'],
   ],
  ];
+ progressiveStories.push(...livingStories);
  function progressiveStory(day,index){
   const entry=progressiveStories[day-1]?.[index];
   if(!entry)throw new RangeError('No progressive teaching scene for this lesson');

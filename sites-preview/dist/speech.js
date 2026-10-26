@@ -8,6 +8,8 @@
  function status(){const v=selected();return !root.speechSynthesis||!root.SpeechSynthesisUtterance?'此浏览器不支持朗读':v?'设备语音：'+v.name+' · '+v.lang: '正在等待设备中文语音；若无法播放，请检查系统中文语音。';}
  function taskText(t,storyText=''){
   if(t.kind==='warmup')return '小朋友，欢迎来到汉字小花园。听一听，读一读，再试一试。准备好了，就点继续。';
+  if(t.pronunciation_context&&t.kind==='learn')return '跟我读。'+t.pronunciation_context+'。'+t.word+'。';
+  if(t.pronunciation_context&&(t.kind==='listen'||t.kind==='review'))return '听一听，找到这个汉字。'+t.pronunciation_context+'的'+t.char+'。'+t.pronunciation_context+'的'+t.char+'。';
   if(t.kind==='learn')return '跟我读。'+t.char+'。'+t.word+'。';
   if(t.kind==='listen'||t.kind==='review')return '听一听，找到这个汉字。'+t.char+'。'+t.char+'。';
   if(t.kind==='match')return '给汉字找词语朋友。'+t.char+'。下面有：'+t.options.join('，')+'。请选择。';
