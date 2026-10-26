@@ -1,0 +1,8 @@
+# Public source mirror: generated voice assets are not cleared for redistribution.
+/dist/audio/
+# Keep local identities, recordings, and verification output private.
+.openai/
+*.mp3
+*.wav
+*.zip
+*audio-integrity*.json
