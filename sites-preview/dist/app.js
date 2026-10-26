@@ -143,10 +143,11 @@ function renderLesson(){
  else if(t.kind==='match')content=`<div class="match-prompt"><div class="character">${esc(t.char)}</div><p>看一看，哪个词语是它的朋友？</p></div>`;
  else if(t.kind==='review'||t.kind==='listen')content=`<div class="listening-mascot">${SproutArt.mascot('listen')}</div><p>小耳朵听一听，再找汉字朋友。</p>`;
  else if(t.kind==='sentence')content=`<div class="story-picture">${SproutArt.story(day,d.sentences.indexOf(t.text),course.version)}</div><p class="sentence">${esc(t.text)}</p><p class="subtle">点击朗读听完整故事，也可以跟着读一读；这不是无提示认读检查。</p>`;
- else if(t.kind==='comprehension'||t.kind==='component'||t.kind==='roleplay')content=`<p class="warmup-text">${esc(t.text)}</p>`;
+ else if(t.kind==='comprehension')content=`<section class="comprehension-context" aria-label="本题的小故事"><div class="story-picture">${SproutArt.story(day,course.version==='sprout-3'&&day===1?1:0,course.version)}</div><p class="story-context-text">${esc(d.sentences[0])}</p></section><p class="warmup-text comprehension-question">${esc(t.text)}</p>`;
+ else if(t.kind==='component'||t.kind==='roleplay')content=`<p class="warmup-text">${esc(t.text)}</p>`;
  else if(t.kind==='reward')content=`<div class="reward-flower" aria-hidden="true">🌼</div><p class="warmup-text">${esc(t.text)}</p>`;
  else content=`<div class="listening-mascot">${SproutArt.mascot('listen')}</div><p class="warmup-text">${esc(t.kind==='warmup'?'听一听，读一读，再试一试。准备好了，就点继续。':t.text)}</p>`;
- main.innerHTML=`<section class="lesson-top"><div><span class="eyebrow">${activeRun==='main'?'第':'复习第'} ${day} 课 · ${esc(d.title)}</span><h2>${type}</h2></div><button class="quiet" id="pause">先休息一下</button></section><progress class="progress" aria-label="本课进度" value="${step}" max="${total}"></progress><section class="activity"><div class="eyebrow">第 ${step+1} 小步 / ${total}</div><h1>${esc(spokenTitle)}</h1>${content}<section class="learning-mode" aria-label="学习方式"><div class="actions"><button class="primary audio" id="play">▶ 点我听一听</button></div><p class="audio-note" id="audio-note" role="status">点一下朗读，听完就可以回答或继续。</p><small id="voice-status">${esc(globalThis.SproutSpeech?.status()||'朗读组件加载失败，请刷新页面')}</small><details class="optional-mode"><summary>其他练习方式（可选）</summary><details id="adult-prompt" class="adult-prompt"><summary>仅给大人：展开带读提示（孩子先不看）</summary><p>${esc(t.adult_prompt||t.text||t.char||'')}</p></details><div class="actions"><button id="adult-read">大人已带读 / 讲解</button><button id="silent-read">静音看字 / 对照练习</button><button id="reread" hidden>重新给大人看提示</button></div></details></section>${t.options?`<div class="options">${t.options.map(o=>`<button class="option ${t.kind==='match'?'word-option':''}" data-answer="${esc(o)}" disabled>${t.kind==='match'?`<span class="option-picture">${SproutArt.word(o,t.char)}</span>`:''}<span class="option-label">${esc(o)}</span></button>`).join('')}</div>`:`<div class="actions"><button class="primary" id="advance" disabled>${t.kind==='reward'?'收下今天的小花':'这一步练好了，继续'}</button></div>`}<div id="feedback" role="status" aria-live="polite" tabindex="-1"></div></section>`;
+ main.innerHTML=`<section class="lesson-top"><div><span class="eyebrow">${activeRun==='main'?'第':'复习第'} ${day} 课 · ${esc(d.title)}</span><h2>${type}</h2></div><button class="quiet" id="pause">先休息一下</button></section><progress class="progress" aria-label="本课进度" value="${step}" max="${total}"></progress><section class="activity"><div class="eyebrow">第 ${step+1} 小步 / ${total}</div><h1>${esc(spokenTitle)}</h1>${content}<section class="learning-mode" aria-label="学习方式"><div class="actions"><button class="primary audio" id="play">${t.kind==='comprehension'?'▶ 听故事，再选一选':'▶ 点我听一听'}</button></div><p class="audio-note" id="audio-note" role="status">点一下朗读，听完就可以回答或继续。</p><small id="voice-status">${esc(globalThis.SproutSpeech?.status()||'朗读组件加载失败，请刷新页面')}</small><details class="optional-mode"><summary>其他练习方式（可选）</summary><details id="adult-prompt" class="adult-prompt"><summary>仅给大人：展开带读提示（孩子先不看）</summary><p>${esc(t.adult_prompt||t.text||t.char||'')}</p></details><div class="actions"><button id="adult-read">大人已带读 / 讲解</button><button id="silent-read">静音看字 / 对照练习</button><button id="reread" hidden>重新给大人看提示</button></div></details></section>${t.options?`<div class="options">${t.options.map(o=>`<button class="option ${t.kind==='match'?'word-option':t.kind==='comprehension'?'word-option comprehension-option':''}" data-answer="${esc(o)}" disabled>${t.kind==='match'?`<span class="option-picture">${SproutArt.word(o,t.char)}</span>`:t.kind==='comprehension'&&SproutArt.comprehensionOption(o)?`<span class="option-picture">${SproutArt.comprehensionOption(o)}</span>`:''}<span class="option-label">${esc(o)}</span></button>`).join('')}</div>`:`<div class="actions"><button class="primary" id="advance" disabled>${t.kind==='reward'?'收下今天的小花':'这一步练好了，继续'}</button></div>`}<div id="feedback" role="status" aria-live="polite" tabindex="-1"></div></section>`;
  document.querySelector('#pause').onclick=()=>go('home');
  const playButton=document.querySelector('#play');if(playButton)playButton.onclick=()=>play(t);
  document.querySelector('#adult-read').onclick=()=>acknowledgeMode('adult');
@@ -173,11 +174,11 @@ function play(t){
  if(busy||pending||storageProblem)return;stopAudio();autoSpeech=true;hideAdultPrompt();audioTask=t;
  const b=document.querySelector('#play'),note=document.querySelector('#audio-note');if(!b)return;
  document.querySelectorAll('[data-answer],#advance').forEach(x=>x.disabled=true);
- b.textContent='↻ 再听一次';note.textContent='正在准备朗读…';
+ b.textContent=t.kind==='comprehension'?'↻ 再听故事和问题':'↻ 再听一次';note.textContent='正在准备朗读…';
  const engine=globalThis.SproutSpeech;
  const fail=message=>{if(audioTask!==t)return;heard=false;learningMode=null;note.textContent=message+' 这一步还没有完成；请点上方按钮重试。';document.querySelectorAll('[data-answer],#advance').forEach(x=>x.disabled=true);};
  if(!engine)return fail('朗读组件未加载，请刷新页面。');
- engine.speak(engine.taskText(t),{
+ engine.speak(engine.taskText(t,t.kind==='comprehension'?course.days[currentDay()-1].sentences[0]:''),{
   start:label=>{if(audioTask!==t)return;note.textContent='正在朗读，听完就可以继续。';const status=document.querySelector('#voice-status');if(status)status.textContent='设备语音：'+label;},
   end:()=>{if(audioTask!==t)return;heard=true;learningMode='audio';note.textContent='听到了吗？来试一试。没听清可以再听一次。';enableAnswers();},
   error:fail
@@ -213,8 +214,9 @@ async function flush(){
 function showFeedback(){
  const speakFeedback=learningMode==='audio';stopAudio();const f=feedback;feedback=null;const isQuestion=Object.hasOwn(f.task,'answer');
  const correct=!isQuestion||f.answer===f.task.answer;
- const heading=f.task.kind==='reward'?'今天的小花，已经种好啦！':isQuestion?(correct?'答对啦，找到朋友了！':'这次还没找对，一起看看！'):'又向前走了一小步！';
- const extra=isQuestion&&!correct?'你选了「'+f.answer+'」。这个朋友是「'+f.task.answer+'」，下次再见见它。':'这一步已经保存，可以随时休息。';
+ const isStory=f.task.kind==='comprehension';
+ const heading=isStory?(correct?'答对啦，你读懂了故事！':'再听听故事，一起找一找。'):f.task.kind==='reward'?'今天的小花，已经种好啦！':isQuestion?(correct?'答对啦，找到朋友了！':'这次还没找对，一起看看！'):'又向前走了一小步！';
+ const extra=isStory?'故事里说：'+course.days[currentDay()-1].sentences[0]+' 所以选「'+f.task.answer+'」。':isQuestion&&!correct?'你选了「'+f.answer+'」。这个朋友是「'+f.task.answer+'」，下次再见见它。':'这一步已经保存，可以随时休息。';
  const box=document.querySelector('#feedback');if(!box)return render();
  // Retain the child's original choice and show the correct example, with shape + words.
  document.querySelectorAll('[data-answer]').forEach(button=>{
@@ -225,11 +227,11 @@ function showFeedback(){
   }else if(!correct&&button.dataset.answer===f.task.answer){
    button.classList.add('answer-example');
    button.innerHTML+='<span class="choice-result"><span aria-hidden="true">✓</span>看看这个</span>';
-   button.setAttribute('aria-label',button.dataset.answer+'，正确的朋友，看看这个');
+   button.setAttribute('aria-label',button.dataset.answer+(isStory?'，故事中的答案，看看这个':'，正确的朋友，看看这个'));
   }
  });
  const mark=correct?'<path d="M13 33l13 13 27-30"/>':'<path d="M15 24a21 21 0 1 1-2 22M15 24V10M15 24H29"/>';
- box.innerHTML=`<div class="feedback ${correct?'feedback-success':'feedback-try'}"><div class="feedback-hero"><span class="feedback-symbol" aria-hidden="true"><svg viewBox="0 0 64 64">${mark}</svg></span><div class="feedback-copy"><strong>${esc(heading)}</strong><p>${esc(extra)}</p></div><div class="feedback-mascot">${SproutArt.mascot(correct?'success':'try')}</div></div><div class="actions"><button class="audio" id="feedback-play">▶ 听一听鼓励</button><button class="primary" id="next">${f.task.kind==='reward'?'回到小花园':'下一小步'}</button></div><p id="feedback-audio-note" role="status"></p></div>`;
+ box.innerHTML=`<div class="feedback ${correct?'feedback-success':'feedback-try'}"><div class="feedback-hero"><span class="feedback-symbol" aria-hidden="true"><svg viewBox="0 0 64 64">${mark}</svg></span><div class="feedback-copy"><strong>${esc(heading)}</strong><p>${esc(extra)}</p></div><div class="feedback-mascot">${SproutArt.mascot(correct?'success':'try')}</div></div><div class="actions"><button class="audio" id="feedback-play">${isStory?'▶ 听故事讲解':'▶ 听一听鼓励'}</button><button class="primary" id="next">${f.task.kind==='reward'?'回到小花园':'下一小步'}</button></div><p id="feedback-audio-note" role="status"></p></div>`;
  document.querySelectorAll('[data-answer],#advance,#play,#adult-read,#silent-read,#reread').forEach(button=>button.disabled=true);
  const readFeedback=()=>{const engine=globalThis.SproutSpeech,note=document.querySelector('#feedback-audio-note');if(!engine)return;if(note)note.textContent='正在朗读…';engine.speak(heading+'。'+extra,{end:()=>{if(note)note.textContent='可以点下一小步，也可以再听一次。';},error:message=>{if(note)note.textContent=message+' 练习结果已保存，可以点击重听。';}});};
  document.querySelector('#feedback-play').onclick=readFeedback;

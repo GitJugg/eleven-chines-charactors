@@ -6,12 +6,13 @@
  function voices(){return (root.speechSynthesis?.getVoices()||[]).filter(v=>/^zh(?:-|_)?(?:CN|TW|SG|Hans|Hant)?$/i.test(v.lang)||/^cmn(?:-|$)/i.test(v.lang));}
  function selected(){return voices().sort((a,b)=>(Number(/^zh[-_]CN$/i.test(b.lang))*4+Number(b.localService)*2)-(Number(/^zh[-_]CN$/i.test(a.lang))*4+Number(a.localService)*2))[0]||null;}
  function status(){const v=selected();return !root.speechSynthesis||!root.SpeechSynthesisUtterance?'此浏览器不支持朗读':v?'设备语音：'+v.name+' · '+v.lang: '正在等待设备中文语音；若无法播放，请检查系统中文语音。';}
- function taskText(t){
+ function taskText(t,storyText=''){
   if(t.kind==='warmup')return '小朋友，欢迎来到汉字小花园。听一听，读一读，再试一试。准备好了，就点继续。';
   if(t.kind==='learn')return '跟我读。'+t.char+'。'+t.word+'。';
   if(t.kind==='listen'||t.kind==='review')return '听一听，找到这个汉字。'+t.char+'。'+t.char+'。';
   if(t.kind==='match')return '给汉字找词语朋友。'+t.char+'。下面有：'+t.options.join('，')+'。请选择。';
   if(t.kind==='sentence')return t.text+'。听完后，你也试着读一读。';
+  if(t.kind==='comprehension'&&storyText)return '看图，听故事。'+storyText+'。现在想一想：'+t.text+'。选项是：'+t.options.join('，')+'。请选择。';
   if(t.options)return (t.text||t.adult_prompt||t.title)+'。选项是：'+t.options.join('，')+'。请选择。';
   return t.text||t.adult_prompt||t.char||t.title||'';
  }

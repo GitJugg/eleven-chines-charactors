@@ -114,6 +114,27 @@
   '天晴':[clearSky,'有太阳、没有雨滴的天空'], '开门':[opening,'小兔伸手打开门'], '朋友':[friends,'两个伙伴牵手相伴，不固定指代某个角色'], '我们':[group,'一群人站在一起，说话人也在其中，需要换角色练习'],
   '看书':[g(g(rabbit,-9,-11,.88)+g(book,56,91,.48),0,9),'小兔眼睛朝向打开的书页'], '找书':[search,'小兔在书架上寻找书'], '读书':[g(reading,0,9),'看着书页，嘴边声音线表示读出声音'], '这本':[near,'手势指向近处的这本书，远处一本作为对照'], '书本':[closedBook,'带书脊、封面和成叠书页的一本书'],
  };
+ // Explicit story-question choices. Unknown phrases return no image, never a
+ // decorative fallback tree: future curriculum must add reviewed semantic art.
+ const comprehensionChoices={
+  '门口':[g(house,-12,3,.96)+g(door(true),77,65,.59)+g(rabbit,121,88,.42),'小兔站在房子的门口'],
+  '山上':[g(mountain,0,15,1)+g(rabbit,44,-3,.40),'小兔站在山顶'],
+  '水里':[insideWater,'小鱼在蓝色水域里面'],
+  '河里':[g(river,0,0,1)+g(fish,59,56,.6),'两岸之间的小河里有小鱼'],
+  '树上':[g(tree,0,0,1)+g(bird,69,14,.43),'小鸟停在树上'],
+  '小兔':[rabbit,'一只长耳朵的小兔'],
+  '小鸟':[bird,'一只有翅膀的小鸟'],
+  '小鱼':[fish,'一条有鱼鳍的小鱼'],
+  '水果':[fruit,'碗里装着水果'],
+  '雨伞':[umbrella,'一把有伞面和弯柄的雨伞'],
+  '小兔的朋友':[group,'故事里的三个小朋友一起到访'],
+  '只有小兔':[rabbit,'只有小兔一个角色'],
+  '只有小鱼':[fish,'只有小鱼一个角色'],
+  '拿伞出门':[g(door(true),-43,9,.86)+g(holding,65,13,.86)+move('direction-out','M88 150h47m-9-8 9 8-9 8'),'小兔拿伞走出门，箭头从门内指向外面'],
+  '读这本书':[reading,'小兔看着打开的这本书，嘴边的声音线表示朗读'],
+  '去河里游':[g(river,0,0,1)+g(fish,57,59,.6)+move('swim-trail','M82 39h81m-9-8 9 8-9 8'),'小鱼在河里沿箭头游动'],
+ };
+ function comprehensionOption(option){const entry=comprehensionChoices[option];return entry?svg(entry[0],entry[1],'0 0 240 180','character-art',`data-comprehension-option="${safe(option)}"`):null;}
  const progressiveStories=[
   [
    [g(leaving,13,12,1)+g(approaching,331,12,1), '小兔出门了，来到门口；有人招呼“来，小兔”，箭头指向招呼者'],
@@ -169,5 +190,5 @@
   const descriptions=[['太阳照着山和河水','月亮升起，小山安静'],['大树、小树和树林','森林里高高低低的树'],['张开双手向朋友问好','用眼睛找一找小手'],['田边的小牛和山上的羊','小马走过田地'],['白云和吹动叶子的风','雨滴和雪花'],['红花、小草和树叶','白云飘过花草'],['左手和右手一起拍一拍','小山在中间，云在上，花草在下']];
   return svg(rect(0,0,600,200,day===1&&index?'#dde3dc':'#e7fcf6',20)+ground+scene,descriptions[day-1]?.[index]||'小芽的花园','0 0 600 200','story-art');
  }
- globalThis.SproutArt=Object.freeze({character,word,story,mascot});
+ globalThis.SproutArt=Object.freeze({character,word,story,mascot,comprehensionOption});
 })();
