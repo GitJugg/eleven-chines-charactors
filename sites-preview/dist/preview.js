@@ -35,14 +35,14 @@
  function canonical(e){return JSON.stringify(Object.keys(e).sort().map(k=>[k,e[k]]));}
  function submit(d,catalog,e,now=new Date().toISOString()){
   const keys=['id','course_version','lesson_id','run_id','step','answer','mode','occurred_at','client_timezone','generation'];
-  if(!e||Object.keys(e).sort().join()!==keys.sort().join()||typeof e.id!=='string'||e.id.length<8||e.id.length>100||typeof e.run_id!=='string'||!/^[A-Za-z0-9_-]{1,80}$/.test(e.run_id)||!['adult','silent'].includes(e.mode))fail('无效预览记录');
+  if(!e||Object.keys(e).sort().join()!==keys.sort().join()||typeof e.id!=='string'||e.id.length<8||e.id.length>100||typeof e.run_id!=='string'||!/^[A-Za-z0-9_-]{1,80}$/.test(e.run_id)||!['adult','silent','audio'].includes(e.mode))fail('无效预览记录');
   const {day,t}=taskFor(catalog,e);
   if(t.options?!t.options.includes(e.answer):e.answer!==null)fail('无效答案');
   const previous=d.events.find(x=>x.event.id===e.id);
   if(previous){if(canonical(previous.event)!==canonical(e))fail('重复标识内容不同');return;}
   if(e.generation!==d.generation)fail('本机进度代次已改变');
-  const required=e.run_id==='main'?day.day-1:day.day;
-  if(required>0&&!rewarded(d,catalog,e.course_version,required))fail('请先完成相应课程');
+  // A first run may start at any lesson. Only a repeat requires its own completed first run.
+  if(e.run_id!=='main'&&!rewarded(d,catalog,e.course_version,day.day))fail('请先完成这一课，再开始重复练习');
   const count=d.events.filter(x=>x.event.course_version===e.course_version&&x.event.lesson_id===e.lesson_id&&x.event.run_id===e.run_id).length;
   if(count!==e.step)fail('本机进度已改变，请重新读取');
   let stamp=Date.parse(e.occurred_at),basis='client_reported';

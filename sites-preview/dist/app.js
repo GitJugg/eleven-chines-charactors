@@ -3,7 +3,7 @@ const main=document.querySelector('#main'), connection=document.querySelector('#
 const OLD_KEY='sprout-sites-legacy-unused:', KEY='sprout-sites-pending-v1:';
 let registry=null,course=null,activeRun='main',selectedDay=null,learningMode=null,calendarData=null,calendarMonth=null,calendarDate=null,calendarFilter='',calendarSerial=0,calendarError=null,calendarLoading=false;
 let state=null,pending=null,storageProblem=false,busy=false,feedback=null,heard=false,audioTask=null,parentOpen=false;
-let readSerial=0,mutationSerial=0,corruptEntries=[];
+let readSerial=0,mutationSerial=0,corruptEntries=[],autoSpeech=false;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const id=()=>globalThis.crypto?.randomUUID?.() || 'event-'+Date.now().toString(36)+'-'+Array.from(crypto.getRandomValues(new Uint32Array(3))).join('-');
 function progressState(){return state?.courses?.[course?.version]||state;}
@@ -26,7 +26,7 @@ function startPractice(day){
  const open=state.runs.find(r=>r.course_version===course.version&&r.day===day&&r.run_id!=='main'&&!r.complete);
  startLesson(day,open?.run_id||id());
 }
-function stopAudio(){voice.pause();voice.removeAttribute('src');voice.load();voice.onended=null;voice.onerror=null;heard=false;audioTask=null;learningMode=null;}
+function stopAudio(){globalThis.SproutSpeech?.cancel();voice.pause();voice.removeAttribute('src');voice.load();voice.onended=null;voice.onerror=null;heard=false;audioTask=null;learningMode=null;}
 async function request(path,body){return SproutPreview.request(path,body);}
 
 function readPending(){
@@ -77,13 +77,13 @@ async function boot(){
   if(storageProblem)storageNotice();else if(pending)await flush();
  }catch(e){main.innerHTML='<section class="gate"><h1>小花园暂时连不上</h1><p>请确认页面资源已加载，并允许本网站使用浏览器存储；隐私浏览或存储限制可能阻止保存。</p><button id="reload" class="primary">重新打开</button></section>';document.querySelector('#reload').onclick=()=>location.reload();if(pending)waitingNotice();}
 }
-function go(where){stopAudio();feedback=null;calendarSerial++;if(where!=='lesson'){selectedDay=null;activeRun='main';}const destination=where==='lesson'?where+'/'+course.version+'/'+currentDay()+'/'+activeRun:where+'/'+course.version;if(location.hash==='#'+destination)render();else location.hash='#'+destination;}
-function render(){
+function go(where){stopAudio();feedback=null;calendarSerial++;if(!['lesson','overview'].includes(where)){selectedDay=null;activeRun='main';}const destination=where==='lesson'?where+'/'+course.version+'/'+currentDay()+'/'+activeRun:where==='overview'?where+'/'+course.version+'/'+currentDay():where+'/'+course.version;if(location.hash==='#'+destination)render({navigation:true});else location.hash='#'+destination;}
+function render({navigation=false}={}){
  if(!course||!state)return;stopAudio();
  const parts=(location.hash.slice(1)||'home').split('/'),view=parts[0];
- if(view!=='lesson'){selectedDay=null;activeRun='main';}
+ if(!['lesson','overview'].includes(view)){selectedDay=null;activeRun='main';}
  if(parts[1]){const found=registry.courses.find(c=>c.version===parts[1]);if(found)course=found;}
- if(view==='lesson'&&parts[2]){
+ if(['lesson','overview'].includes(view)&&parts[2]){
   const day=Number(parts[2]);if(course.days.some(d=>d.day===day)){selectedDay=day;activeRun=parts[3]||'main';}
  }
  if(view==='lesson'&&currentTask())renderLesson();
@@ -93,8 +93,11 @@ function render(){
   if(globalThis.history?.replaceState)globalThis.history.replaceState(null,'',home);else location.hash=home;
   renderHome();
  }
+ else if(view==='overview')renderOverview();
  else if(view==='parent')parentOpen?renderParent():renderGate();
  else renderHome();
+ // Only intentional navigation resets reading position; state/calendar refreshes do not.
+ if(navigation&&['home','overview','lesson'].includes(view))main.scrollIntoView({block:'start',behavior:'auto'});
 }
 const landscape=`<svg viewBox="0 0 440 310" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="阳光下，小屋旁的幼苗正在长大"><circle cx="333" cy="65" r="30" fill="#efc36f"/><path d="M240 49h39m-31 8h46" stroke="#f7f9ef" stroke-width="12" stroke-linecap="round"/><path d="M-30 270Q96 157 211 234T470 218V340H-30" fill="#c4d3b1"/><path d="M-10 293Q114 219 237 265T460 255V330H-10" fill="#9fb98c"/><path d="M108 161V270H237V161L174 105Z" fill="#fcf7de"/><path d="M90 166L174 94L254 166" fill="none" stroke="#b8794e" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><rect x="150" y="207" width="43" height="63" rx="20" fill="#709471"/><circle cx="182" cy="242" r="3" fill="#f4d491"/><rect x="124" y="174" width="23" height="24" rx="4" fill="#d2dfb9"/><path d="M136 174v24m-12-12h23" stroke="#fff9e8" stroke-width="3"/><path d="M303 264V201" stroke="#527951" stroke-width="8" stroke-linecap="round"/><path d="M303 238Q258 234 263 207Q302 205 303 238M305 222Q345 221 340 189Q304 188 305 222" fill="#658d59"/><path d="M301 273q24 0 32-14h-61q7 14 29 14" fill="#b97c56"/><path d="M154 306q12-27 18-36" stroke="#e7d6ad" stroke-width="24"/><circle cx="66" cy="263" r="7" fill="#e2ad65"/><path d="M66 268v13" stroke="#6c8c5b" stroke-width="3"/><path d="M366 271l8-13 9 13" stroke="#67885d" stroke-width="4" fill="none"/></svg>`;
 function courseSwitches(){return `<nav class="course-tabs" aria-label="课程区域">${registry.courses.map(c=>`<button id="course-${esc(c.version)}" aria-pressed="${course.version===c.version}">${esc(c.title)}</button>`).join('')}</nav>`;}
@@ -102,27 +105,41 @@ function bindCourseSwitches(){for(const c of registry.courses){const b=document.
 function renderHome(){
  const p=progressState(),day=currentDay(),d=course.days[day-1],done=p.rewards.length===course.days.length,started=p.positions[day]>0;
  main.innerHTML=`${courseSwitches()}<section class="hero"><div class="hero-copy"><div class="eyebrow">${esc(course.title)} · 第 ${day} 课</div><h1>${done?'这一程的小花园，开花啦！':'今天，也长大一点点。'}</h1><p>${done?'这些汉字朋友，等你慢慢熟悉。':'走进「'+esc(d.title)+'」，和 5 个汉字交朋友。'}<br>一次学一点，随时可以休息。</p><button class="primary" id="start">${done?'再读一读第 1 课':started?'接着上次的冒险':'开始今天的冒险'}</button><div class="badge">${state.calendar.today_steps?'今天已尝试 '+state.calendar.today_steps+' 小步':'约 '+state.settings.reference_minutes+' 分钟参考，可分次完成'} · 没有倒计时</div></div><div class="art">${landscape}</div></section>
- <p class="mode-notice">自然音频尚未就绪。每一步可选成人带读或静音练习；不记为自主认读。</p>
+ <p class="mode-notice">点击朗读按钮，听普通话读字、词语和故事。使用设备语音，音色由设备决定；跟读和答对不等于已经掌握。</p>
  <div class="section-top"><h2>${course.area==='foundation'?'基础复习小花园':'小兔的阅读之旅'}</h2><span class="subtle">${p.rewards.length} / ${course.days.length} 朵小花 · 完成不等于掌握</span></div>
- <section class="garden" aria-label="课程进度">${course.days.map(x=>`<button id="lesson-${x.day}" class="day-card ${p.rewards.includes(x.day)?'complete':x.day===day?'current':'future'}" ${!p.rewards.includes(x.day)&&x.day!==day?'disabled':''}><span class="plant" aria-hidden="true">${p.rewards.includes(x.day)?'🌼':x.day===day?'🌱':'·'}</span><strong>第 ${x.day} 课</strong><small>${esc(x.title)}</small><small>${p.rewards.includes(x.day)?'已完成 · 可再练':x.day===day?'继续 / 开始':'还没出发'}</small></button>`).join('')}</section>
+ <p class="subtle">每一课都可以先看内容，也可以自由选择从哪一课开始。跳过的课不会算作完成。</p>
+ <section class="garden" aria-label="课程进度">${course.days.map(x=>`<article class="day-card ${p.rewards.includes(x.day)?'complete':x.day===day?'current':''}"><span class="plant" aria-hidden="true">${p.rewards.includes(x.day)?'🌼':esc(x.icon||'🌱')}</span><strong>第 ${x.day} 课 · ${esc(x.title)}</strong><p class="lesson-characters">${x.words.map(w=>esc(w.char)).join('　')}</p><small>${p.rewards.includes(x.day)?'已完成 · 可以再练':p.positions[x.day]>0?'已开始 · 随时接着学':'还没开始 · 可以直接学'}</small><div class="lesson-card-actions"><button id="preview-${x.day}" class="quiet" aria-label="查看第 ${x.day} 课 ${esc(x.title)} 的内容">看看内容</button><button id="lesson-${x.day}" aria-label="${p.rewards.includes(x.day)?'复习':p.positions[x.day]>0?'继续':'开始'}第 ${x.day} 课 ${esc(x.title)}">${p.rewards.includes(x.day)?'再练一次':p.positions[x.day]>0?'接着学':'开始学习'}</button></div></article>`).join('')}</section>
  <section class="home-bottom"><div class="note-box"><b>这一课的汉字朋友</b>${d.words.map(w=>esc(w.char)).join('　')}</div><div class="note-box"><b>不着急，我们慢慢来</b>认字 · 读词句 · 理解小故事 · 收下小花</div></section>
  <section class="roadmap"><div class="section-top"><h2>一步步走向 3000 字认读目标</h2></div><p>当前实际发布 ${registry.published_characters} 个不同目标字：基础 35 字 + 原创进阶 35 字。规划容量不等于已完成课程，也不保证掌握。</p><ol>${registry.stages.map(stage=>`<li><strong>${esc(stage.title)} · 累计 ${stage.target} 字</strong><span>${stage.status==='partial'?'首批内容可用，仍在扩充':'规划中，尚无可学习课件'}</span><small>${esc(stage.focus)}</small></li>`).join('')}</ol><p class="subtle">阶段是内部规划节点，不是年龄标准。没有完成课程就自动登记掌握的规则。</p></section>`;
  bindCourseSwitches();document.querySelector('#start').onclick=()=>done?startPractice(1):startLesson(day);
- for(const x of course.days)document.querySelector('#lesson-'+x.day).onclick=()=>p.rewards.includes(x.day)?startPractice(x.day):startLesson(x.day);
+ for(const x of course.days){
+  document.querySelector('#lesson-'+x.day).onclick=()=>p.rewards.includes(x.day)?startPractice(x.day):startLesson(x.day);
+  document.querySelector('#preview-'+x.day).onclick=()=>{if(busy||pending)return;selectedDay=x.day;activeRun='main';go('overview');};
+ }
+}
+function renderOverview(){
+ const day=currentDay(),d=course.days.find(x=>x.day===day);if(!d)return go('home');
+ const p=progressState(),tasks=course.lessons[day],review=[...new Set(tasks.filter(t=>t.kind==='review').map(t=>t.char))];
+ const kinds={warmup:'听一听，准备出发',review:'听音温习汉字',learn:'认识汉字和词语',listen:'听音找汉字',match:'词语配对',sentence:'听读故事和句子',comprehension:'回答故事问题',component:'发现字形联系',roleplay:'换个角色说一说',reward:'收下学习小花'};
+ const activities=[...new Set(tasks.map(t=>kinds[t.kind]||t.title))];
+ main.innerHTML=`<section class="lesson-overview"><div class="eyebrow">${esc(course.title)} · 第 ${day} 课</div><h1>${esc(d.title)}</h1><p>先看看这一课，喜欢就出发。</p><div class="actions"><button class="quiet" id="overview-back">返回课程列表</button><button class="primary" id="overview-start">${p.rewards.includes(day)?'这一课再练一次':p.positions[day]>0?'接着学这一课':'从这一课开始'}</button></div><p class="subtle">查看内容不会记为学习或完成。不用先学前面的课，也不会替你完成跳过的课。</p><section class="overview-words" aria-label="本课汉字和词语">${d.words.map(w=>`<article class="overview-word"><strong class="char">${esc(w.char)}</strong><span class="word">${esc(w.word)}</span></article>`).join('')}</section><section class="overview-story"><h2>这一课读什么</h2>${d.sentences.map(text=>`<p class="sentence">${esc(text)}</p>`).join('')}</section>${review.length?`<p class="subtle">本课也会温习：${review.map(esc).join('、')}。没学过也可以跟着朗读认识，不影响从本课开始。</p>`:''}<section class="overview-activities"><h2>会玩哪些练习</h2><ul>${activities.map(label=>`<li>${esc(label)}</li>`).join('')}</ul><p class="subtle">共 ${tasks.length} 小步，可以中途休息，之后接着学。</p></section></section>`;
+ document.querySelector('#overview-back').onclick=()=>go('home');
+ document.querySelector('#overview-start').onclick=()=>p.rewards.includes(day)?startPractice(day):startLesson(day);
 }
 function renderLesson(){
  const day=currentDay(),d=course.days[day-1],step=currentPosition(),t=currentTask(),total=course.lessons[day].length;
  if(!t)return go('home');
+ const spokenTitle=(t.kind==='listen'||t.kind==='review')?'听声音，找汉字':t.kind==='sentence'?'听故事，读句子':t.title;
  const type={warmup:'出发前，听一听',review:'先见见老朋友',learn:'认识新朋友',listen:'小耳朵时间',match:'词语配对',sentence:'读一个小故事',reward:'每次尝试，都值得鼓励',comprehension:'读懂小故事',component:'发现字形小联系',roleplay:'换个角色说一说'}[t.kind];
  let content='';
  if(t.kind==='learn')content=`<div class="learning-card"><div class="learning-picture">${SproutArt.character(t.char)}</div><div><div class="character">${esc(t.char)}</div><div class="word">${esc(t.word)}</div></div></div>`;
  else if(t.kind==='match')content=`<div class="match-prompt"><div class="character">${esc(t.char)}</div><p>看一看，哪个词语是它的朋友？</p></div>`;
  else if(t.kind==='review'||t.kind==='listen')content=`<div class="listening-mascot">${SproutArt.mascot('listen')}</div><p>小耳朵听一听，再找汉字朋友。</p>`;
- else if(t.kind==='sentence')content=`<div class="story-picture">${SproutArt.story(day,d.sentences.indexOf(t.text),course.version)}</div><p class="sentence">${esc(t.text)}</p><p class="subtle">${t.reading_mode==='shared'?'成人共读，未教字由大人帮助':esc(t.note||'')}${t.support_characters?.length?' · 成人辅助字：'+t.support_characters.map(esc).join('、'):''}</p>`;
+ else if(t.kind==='sentence')content=`<div class="story-picture">${SproutArt.story(day,d.sentences.indexOf(t.text),course.version)}</div><p class="sentence">${esc(t.text)}</p><p class="subtle">点击朗读听完整故事，也可以跟着读一读；这不是无提示认读检查。</p>`;
  else if(t.kind==='comprehension'||t.kind==='component'||t.kind==='roleplay')content=`<p class="warmup-text">${esc(t.text)}</p>`;
  else if(t.kind==='reward')content=`<div class="reward-flower" aria-hidden="true">🌼</div><p class="warmup-text">${esc(t.text)}</p>`;
- else content=`<div class="listening-mascot">${SproutArt.mascot('listen')}</div><p class="warmup-text">${esc(t.text)}</p>`;
- main.innerHTML=`<section class="lesson-top"><div><span class="eyebrow">${activeRun==='main'?'第':'复习第'} ${day} 课 · ${esc(d.title)}</span><h2>${type}</h2></div><button class="quiet" id="pause">先休息一下</button></section><progress class="progress" aria-label="本课进度" value="${step}" max="${total}"></progress><section class="activity"><div class="eyebrow">第 ${step+1} 小步 / ${total}</div><h1>${esc(t.title)}</h1>${content}<section class="learning-mode" aria-label="学习方式"><p>自然音频尚未就绪，请选一种方式。带读或对照练习不计为自主认读。</p><details id="adult-prompt" class="adult-prompt"><summary>仅给大人：展开带读提示（孩子先不看）</summary><p>${esc(t.adult_prompt||t.text||t.char||'')}</p></details><div class="actions"><button id="adult-read">大人已带读 / 讲解</button><button id="silent-read">静音看字 / 对照练习</button><button id="reread" hidden>重新给大人看提示</button>${t.audio?'<button class="audio" id="play">▶ 尝试本地音频</button>':''}</div><p class="audio-note" id="audio-note">选好方式后再继续。可以随时休息。</p></section>${t.options?`<div class="options">${t.options.map(o=>`<button class="option ${t.kind==='match'?'word-option':''}" data-answer="${esc(o)}" disabled>${t.kind==='match'?`<span class="option-picture">${SproutArt.word(o,t.char)}</span>`:''}<span class="option-label">${esc(o)}</span></button>`).join('')}</div>`:`<div class="actions"><button class="primary" id="advance" disabled>${t.kind==='reward'?'收下今天的小花':'这一步练好了，继续'}</button></div>`}<div id="feedback" role="status" aria-live="polite" tabindex="-1"></div></section>`;
+ else content=`<div class="listening-mascot">${SproutArt.mascot('listen')}</div><p class="warmup-text">${esc(t.kind==='warmup'?'听一听，读一读，再试一试。准备好了，就点继续。':t.text)}</p>`;
+ main.innerHTML=`<section class="lesson-top"><div><span class="eyebrow">${activeRun==='main'?'第':'复习第'} ${day} 课 · ${esc(d.title)}</span><h2>${type}</h2></div><button class="quiet" id="pause">先休息一下</button></section><progress class="progress" aria-label="本课进度" value="${step}" max="${total}"></progress><section class="activity"><div class="eyebrow">第 ${step+1} 小步 / ${total}</div><h1>${esc(spokenTitle)}</h1>${content}<section class="learning-mode" aria-label="学习方式"><div class="actions"><button class="primary audio" id="play">▶ 点我听一听</button></div><p class="audio-note" id="audio-note" role="status">点一下朗读，听完就可以回答或继续。</p><small id="voice-status">${esc(globalThis.SproutSpeech?.status()||'朗读组件加载失败，请刷新页面')}</small><details class="optional-mode"><summary>其他练习方式（可选）</summary><details id="adult-prompt" class="adult-prompt"><summary>仅给大人：展开带读提示（孩子先不看）</summary><p>${esc(t.adult_prompt||t.text||t.char||'')}</p></details><div class="actions"><button id="adult-read">大人已带读 / 讲解</button><button id="silent-read">静音看字 / 对照练习</button><button id="reread" hidden>重新给大人看提示</button></div></details></section>${t.options?`<div class="options">${t.options.map(o=>`<button class="option ${t.kind==='match'?'word-option':''}" data-answer="${esc(o)}" disabled>${t.kind==='match'?`<span class="option-picture">${SproutArt.word(o,t.char)}</span>`:''}<span class="option-label">${esc(o)}</span></button>`).join('')}</div>`:`<div class="actions"><button class="primary" id="advance" disabled>${t.kind==='reward'?'收下今天的小花':'这一步练好了，继续'}</button></div>`}<div id="feedback" role="status" aria-live="polite" tabindex="-1"></div></section>`;
  document.querySelector('#pause').onclick=()=>go('home');
  const playButton=document.querySelector('#play');if(playButton)playButton.onclick=()=>play(t);
  document.querySelector('#adult-read').onclick=()=>acknowledgeMode('adult');
@@ -130,6 +147,7 @@ function renderLesson(){
  document.querySelector('#reread').onclick=()=>{if(busy||pending||storageProblem)return;stopAudio();document.querySelectorAll('[data-answer],#advance').forEach(b=>b.disabled=true);const prompt=document.querySelector('#adult-prompt');prompt.hidden=false;prompt.open=true;document.querySelector('#audio-note').textContent='重新带读时先不让孩子看提示。结束带读后会隐藏提示，再开始选字。';};
  document.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>submit(b.dataset.answer,t));
  const next=document.querySelector('#advance');if(next)next.onclick=()=>submit(null,t);
+ if(autoSpeech&&!pending&&!storageProblem)play(t);
 }
 function hideAdultPrompt(){
  const prompt=document.querySelector('#adult-prompt');if(prompt){prompt.open=false;prompt.hidden=true;}
@@ -137,7 +155,7 @@ function hideAdultPrompt(){
 }
 function acknowledgeMode(mode){
  if(busy||pending||storageProblem||!['adult','silent'].includes(mode))return;
- stopAudio();heard=true;learningMode=mode;
+ stopAudio();autoSpeech=false;heard=true;learningMode=mode;
  hideAdultPrompt();
  const t=currentTask(),note=document.querySelector('#audio-note');
  if(note)note.textContent=mode==='adult'?'已按成人带读 / 讲解记录，不是自主认读检查。':((t.kind==='listen'||t.kind==='review')?'静音对照提示：'+t.adult_prompt+'。对照选字，不是听音检查。':'静音练习已选择，需要时可以请大人帮忙；不计自主认读。');
@@ -145,13 +163,18 @@ function acknowledgeMode(mode){
 }
 function enableAnswers(){if(busy||pending||storageProblem||!heard)return;document.querySelectorAll('[data-answer],#advance').forEach(b=>b.disabled=false);}
 function play(t){
- if(busy)return;stopAudio();hideAdultPrompt();audioTask=t;
+ if(busy||pending||storageProblem)return;stopAudio();autoSpeech=true;hideAdultPrompt();audioTask=t;
  const b=document.querySelector('#play'),note=document.querySelector('#audio-note');if(!b)return;
- b.textContent='♫ 正在播放，再点可重听';note.textContent='听完后，就可以继续了。';
- voice.src='/audio/'+encodeURIComponent(t.audio)+'.wav';
- voice.onended=()=>{if(audioTask!==t)return;heard=true;learningMode='audio';b.textContent='↻ 再听一次';note.textContent='听到了吗？来试一试。';enableAnswers();};
- const fail=()=>{if(audioTask!==t)return;heard=false;b.textContent='↻ 重新播放';note.textContent='声音没有播放成功。这一步还没有完成；可改选成人带读或静音练习，不必等待音频。';document.querySelectorAll('[data-answer],#advance').forEach(x=>x.disabled=true);};
- voice.onerror=fail;voice.play().catch(fail);
+ document.querySelectorAll('[data-answer],#advance').forEach(x=>x.disabled=true);
+ b.textContent='↻ 再听一次';note.textContent='正在准备朗读…';
+ const engine=globalThis.SproutSpeech;
+ const fail=message=>{if(audioTask!==t)return;heard=false;learningMode=null;note.textContent=message+' 这一步还没有完成；请点上方按钮重试。';document.querySelectorAll('[data-answer],#advance').forEach(x=>x.disabled=true);};
+ if(!engine)return fail('朗读组件未加载，请刷新页面。');
+ engine.speak(engine.taskText(t),{
+  start:label=>{if(audioTask!==t)return;note.textContent='正在朗读，听完就可以继续。';const status=document.querySelector('#voice-status');if(status)status.textContent='设备语音：'+label;},
+  end:()=>{if(audioTask!==t)return;heard=true;learningMode='audio';note.textContent='听到了吗？来试一试。没听清可以再听一次。';enableAnswers();},
+  error:fail
+ });
 }
 async function submit(answer,t){
  if(busy||pending||storageProblem||!heard)return;
@@ -181,7 +204,7 @@ async function flush(){
  }finally{busy=false;setSettingsDisabled(false);}
 }
 function showFeedback(){
- stopAudio();const f=feedback;feedback=null;const isQuestion=Object.hasOwn(f.task,'answer');
+ const speakFeedback=learningMode==='audio';stopAudio();const f=feedback;feedback=null;const isQuestion=Object.hasOwn(f.task,'answer');
  const correct=!isQuestion||f.answer===f.task.answer;
  const heading=f.task.kind==='reward'?'今天的小花，已经种好啦！':isQuestion?(correct?'答对啦，找到朋友了！':'这次还没找对，一起看看！'):'又向前走了一小步！';
  const extra=isQuestion&&!correct?'你选了「'+f.answer+'」。这个朋友是「'+f.task.answer+'」，下次再见见它。':'这一步已经保存，可以随时休息。';
@@ -199,9 +222,12 @@ function showFeedback(){
   }
  });
  const mark=correct?'<path d="M13 33l13 13 27-30"/>':'<path d="M15 24a21 21 0 1 1-2 22M15 24V10M15 24H29"/>';
- box.innerHTML=`<div class="feedback ${correct?'feedback-success':'feedback-try'}"><div class="feedback-hero"><span class="feedback-symbol" aria-hidden="true"><svg viewBox="0 0 64 64">${mark}</svg></span><div class="feedback-copy"><strong>${esc(heading)}</strong><p>${esc(extra)}</p></div><div class="feedback-mascot">${SproutArt.mascot(correct?'success':'try')}</div></div><div class="actions"><button class="primary" id="next">${f.task.kind==='reward'?'回到小花园':'下一小步'}</button></div></div>`;
+ box.innerHTML=`<div class="feedback ${correct?'feedback-success':'feedback-try'}"><div class="feedback-hero"><span class="feedback-symbol" aria-hidden="true"><svg viewBox="0 0 64 64">${mark}</svg></span><div class="feedback-copy"><strong>${esc(heading)}</strong><p>${esc(extra)}</p></div><div class="feedback-mascot">${SproutArt.mascot(correct?'success':'try')}</div></div><div class="actions"><button class="audio" id="feedback-play">▶ 听一听鼓励</button><button class="primary" id="next">${f.task.kind==='reward'?'回到小花园':'下一小步'}</button></div><p id="feedback-audio-note" role="status"></p></div>`;
  document.querySelectorAll('[data-answer],#advance,#play,#adult-read,#silent-read,#reread').forEach(button=>button.disabled=true);
- document.querySelector('#next').onclick=()=>{if(f.task.kind==='reward'){selectedDay=null;activeRun='main';go('home');}else render();};
+ const readFeedback=()=>{const engine=globalThis.SproutSpeech,note=document.querySelector('#feedback-audio-note');if(!engine)return;if(note)note.textContent='正在朗读…';engine.speak(heading+'。'+extra,{end:()=>{if(note)note.textContent='可以点下一小步，也可以再听一次。';},error:message=>{if(note)note.textContent=message+' 练习结果已保存，可以点击重听。';}});};
+ document.querySelector('#feedback-play').onclick=readFeedback;
+ if(speakFeedback)readFeedback();
+ document.querySelector('#next').onclick=()=>{if(f.task.kind==='reward'){selectedDay=null;activeRun='main';go('home');}else render({navigation:true});};
  box.focus({preventScroll:true});box.scrollIntoView({block:'nearest',behavior:'auto'});
 }
 function renderGate(){
@@ -213,7 +239,7 @@ function renderParent(){
  main.innerHTML=`<section class="dashboard-head"><div class="eyebrow">陪伴，比催促更重要</div><h1>看见每一点成长</h1><p>完成不等于掌握。这里记录的是练习表现，不是能力评测。暂稳认读：尚未评估（无无提示检查证据）。</p><button class="quiet" id="home">回小花园</button></section>${courseSwitches()}<section class="metrics"><div class="metric">今天的尝试<b>${cal.today_steps} <small>小步</small></b><span class="subtle">${cal.date}</span></div><div class="metric">本周陪伴<b>${cal.week_active_days} <small>天</small></b><span class="subtle">本周共 ${cal.week_steps} 小步</span></div><div class="metric">当前课程小花<b>${p.rewards.length} <small>/ ${course.days.length} 朵</small></b><span class="subtle">首次完成固定 1 朵，复习不重复领奖</span></div></section><p class="subtle">按 ${esc(cal.timezone)} 统计，周一开周。小步包含看故事和收花，不等于识字量；没有计时或连续签到要求。</p>
  <section class="calendar-section" aria-labelledby="calendar-heading"><h2 id="calendar-heading">学习日历</h2><div class="calendar-toolbar"><button id="month-prev" aria-label="上个月">← 上月</button><strong id="calendar-title"></strong><button id="month-next" aria-label="下个月">下月 →</button><button id="month-today">回到今天</button><label for="calendar-filter">课程</label><select id="calendar-filter"><option value="">全部课程</option>${registry.courses.map(c=>`<option value="${esc(c.version)}">${esc(c.title)}</option>`).join('')}</select></div><p id="calendar-status" role="status" aria-live="polite">正在读取已保存的记录…</p><div class="calendar-layout"><div><div class="week-labels" aria-hidden="true">${['一','二','三','四','五','六','日'].map(x=>`<span>${x}</span>`).join('')}</div><div id="calendar-grid" class="calendar-grid" aria-label="按日期选择学习记录"></div></div><section id="calendar-detail" class="calendar-detail" aria-live="polite"></section></div></section>
  <div class="section-top"><h2>${course.days.flatMap(d=>d.words).length} 位汉字朋友 · ${esc(course.title)}</h2></div><section class="word-grid">${course.days.flatMap(d=>d.words).map(w=>{const s=p.stats[w.char];return `<article class="word-status ${s?.wrong?'revisit':''}"><strong>${esc(w.char)}</strong><span>${s?(s.wrong?'建议再见一面':'正在熟悉'):'还未练习'}</span><small>${s?'尝试 '+s.attempts+' 次 · 答对 '+s.correct+' 次':'还没有答题记录'}</small></article>`;}).join('')}</section>
- <section class="note-box"><b>逐步扩展，不赶进度</b>当前发布 ${registry.published_characters} 字，规划至 3000 字。跟读、选择题答对和点完成都不代表稳定认读。首批进阶是原创内容，不是外来教材复刻；自然语音和人工教学试用尚待验收。</section>
+ <section class="note-box"><b>逐步扩展，不赶进度</b>当前发布 ${registry.published_characters} 字，规划至 3000 字。跟读、选择题答对和点完成都不代表稳定认读。首批进阶是原创内容，不是外来教材复刻；当前使用设备普通话语音，非真人录音；不同设备音色可能不同，教学试用尚待验收。</section>
  <section class="settings"><h2>家庭学习目标</h2><p class="subtle">目标不是掌握保证。每日新字和参考分钟是安排建议，不记录为实际用时。</p><form id="settings-form"><label for="target-characters">认读目标字数</label><input id="target-characters" type="number" min="1" max="3000" value="${state.settings.target_characters}" required><label for="target-date">目标日期（可留空）</label><input id="target-date" type="date" value="${esc(state.settings.target_date||'')}"><label for="daily-new">每日新字参考</label><input id="daily-new" type="number" min="1" max="20" value="${state.settings.daily_new_target}" required><label for="reference-minutes">每次分钟参考</label><input id="reference-minutes" type="number" min="1" max="60" value="${state.settings.reference_minutes}" required><button id="save-target" type="submit">保存目标</button><p id="settings-status" role="status"></p></form></section>
  <section class="section-top"><h2>保存这段成长</h2></section><p>Sites 预览的练习记录与目标只保存在当前浏览器，不上传到服务器，也不与极空间同步。清除浏览器数据或更换设备后不会保留。</p><p class="subtle">本页用于查看和试用界面，请勿填写私人日期或当作正式学习档案。NAS 版本的数据库备份与恢复不适用于此预览。</p>`;
  document.querySelector('#home').onclick=()=>go('home');
@@ -273,10 +299,12 @@ async function saveSettings(e){
 }
 
 document.querySelector('#parent-link').onclick=()=>go('parent');
-window.addEventListener('hashchange',async()=>{feedback=null;render();await refreshCurrentView();});
+window.addEventListener('hashchange',async()=>{feedback=null;render({navigation:true});await refreshCurrentView();});
 window.addEventListener('focus',refreshCurrentView);
 window.addEventListener('storage',e=>{if((!e.key?.startsWith(KEY)&&!e.key?.startsWith(OLD_KEY))||busy)return;feedback=null;pending=null;readPending();if(storageProblem)storageNotice();else if(pending)waitingNotice();else refreshState();});
 setInterval(refreshCurrentView,60000);
+window.addEventListener('pagehide',stopAudio);
+if(globalThis.speechSynthesis?.addEventListener) speechSynthesis.addEventListener('voiceschanged',()=>{const status=document.querySelector('#voice-status');if(status)status.textContent=SproutSpeech.status();});
 window.addEventListener('online',()=>pending?flush():null);
 window.addEventListener('pageshow',e=>{if(e.persisted)location.reload();});
 boot();
