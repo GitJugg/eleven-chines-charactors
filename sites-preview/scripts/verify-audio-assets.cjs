@@ -39,7 +39,9 @@ function verify({dist=path.resolve(__dirname,'../dist'),assets=false,expectedInt
   texts.add(normalize(ctx.SproutSpeech.taskText(task,task.kind==='comprehension'?day.sentences[0]:'')));prompts++;
   for(const answer of task.options||[null]){texts.add(normalize(feedback(course,day,task,answer)));feedbackVariants++;}
  }
- const missing=[...texts].filter(t=>!Object.hasOwn(manifest.clips,t)),unused=Object.keys(manifest.clips).filter(t=>!texts.has(t));
+ const storyTexts=fs.existsSync(path.join(dist,'story-course.json'))?new Set(require('./verify-story-audio.cjs').inventory(dist).map(row=>row.text)):new Set();
+ const missing=[...texts].filter(t=>!Object.hasOwn(manifest.clips,t)),unused=Object.keys(manifest.clips).filter(t=>!texts.has(t)&&!storyTexts.has(t));
+ for(const text of storyTexts)if(Object.hasOwn(manifest.clips,text))assert.equal(manifest.clips[text],'audio/'+sha(text)+'.mp3','New-story audio filename must match text SHA-256');
  assert.equal(missing.length,0,'Missing spoken texts from audio manifest');assert.equal(unused.length,0,'Stale audio manifest entries');
  const files=[],expected=expectedIntegrity?new Map(expectedIntegrity.files.map(f=>[f.path,f])):null;
  for(const text of texts){
@@ -53,6 +55,7 @@ function verify({dist=path.resolve(__dirname,'../dist'),assets=false,expectedInt
  if(assets&&expected)assert.equal(expected.size,files.length,'Unexpected files in integrity reference');
  return {summary:{mode:assets?'text-and-assets':'text-only',voice:manifest.voice,prompt_uses:prompts,feedback_variants:feedbackVariants,unique_clips:texts.size,missing_texts:0,unused_clips:0,files_validated:files.length,total_audio_bytes:files.reduce((n,f)=>n+f.bytes,0)},integrity:{schema_version:1,voice:manifest.voice,files:files.sort((a,b)=>a.path.localeCompare(b.path))}};
 }
+module.exports={verify,isMp3};
 if(require.main===module){
  try{
   const args=process.argv.slice(2),allowed=new Set(['--assets','--write-integrity','--expected-integrity']);
@@ -64,4 +67,3 @@ if(require.main===module){
   console.log(JSON.stringify(result.summary));
  }catch(error){console.error(error.message);process.exitCode=1;}
 }
-module.exports={verify,isMp3};
